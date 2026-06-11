@@ -1,0 +1,3437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Rincón de Estudio</title>
+<style>
+/* ── macOS TOKENS ── */
+:root {
+  --bg:      #f5f5f7;
+  --bg2:     #ebebed;
+  --surface: #ffffff;
+  --surface2:#f9f9fb;
+  --border:  rgba(0,0,0,.07);
+  --border2: rgba(0,0,0,.11);
+  --text:    #1d1d1f;
+  --muted:   #6e6e73;
+  --accent:  #0071e3;
+  --accent2: #0077ed;
+  --green:   #34c759;
+  --shadow:  rgba(0,0,0,.07);
+  --radius:  10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
+  background:var(--bg);color:var(--text);height:100vh;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:4px}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:48px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 18px;gap:8px;
+  z-index:100;
+  transition:opacity .35s ease, background .35s ease, border-color .35s ease;
+}
+/* ── Modo Cinema (doble clic en el video) ── */
+body.cinema .sl{transform:translateX(-100%);}
+body.cinema .sr{transform:translateX(100%);}
+body.cinema .sidebar-toggle-btn{opacity:0;pointer-events:none;transition:opacity .3s;}
+body.cinema .yt-vol-ctrl{opacity:.18;transition:opacity .35s ease;}
+body.cinema .yt-vol-ctrl:hover{opacity:1;}
+body.cinema .fs-btn{opacity:.18;transition:opacity .35s ease;}
+body.cinema .fs-btn:hover{opacity:1;}
+body.cinema .sidebar-toggle-btn.sl-toggle{left:0;}
+body.cinema .sidebar-toggle-btn.sr-toggle{right:0;}
+body.cinema .topbar{
+  background:rgba(255,255,255,0);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  border-bottom-color:transparent;
+  opacity:.10;
+}
+body.cinema .topbar:hover{
+  opacity:1;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom-color:var(--border);
+}
+.logo{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;letter-spacing:-.3px}
+.logo em{color:var(--muted);font-style:normal;font-weight:400}
+.topbar-nav{display:flex;gap:1px;margin-left:14px}
+.nav-btn{
+  padding:4px 11px;border-radius:6px;border:none;
+  background:transparent;cursor:pointer;font-size:12px;
+  color:var(--muted);transition:all .15s;letter-spacing:-.1px;font-weight:400;
+}
+.nav-btn:hover{background:rgba(0,0,0,.05);color:var(--text)}
+.nav-btn.active{background:rgba(0,0,0,.07);color:var(--text);font-weight:500}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn-pro{
+  background:var(--accent);color:#fff;border:none;border-radius:7px;
+  padding:5px 12px;font-size:11.5px;font-weight:500;cursor:pointer;
+  transition:filter .15s;letter-spacing:-.1px;
+}
+.btn-pro:hover{filter:brightness(1.1)}
+.avatar{
+  width:27px;height:27px;border-radius:50%;
+  background:linear-gradient(135deg,#c8d8f0,#a0b8e0);
+  color:var(--text);font-size:10.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── VIEWS ── */
+.view{display:none;position:fixed;top:0;left:0;right:0;bottom:0}
+.view.active{display:flex}
+#vFocus{flex-direction:row}
+
+/* ── LEFT SIDEBAR ── */
+.sl{
+  position:absolute;left:0;top:0;bottom:0;
+  width:320px;z-index:15;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-right:1px solid var(--border);
+  overflow-y:auto;overflow-x:hidden;padding:62px 11px 14px;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.sl.collapsed{transform:translateX(-100%);}
+.section-title{
+  font-size:10px;font-weight:600;letter-spacing:.3px;
+  color:var(--muted);text-transform:uppercase;
+  margin:16px 0 7px 4px;
+}
+.section-title:first-child{margin-top:2px}
+
+.active-subject-bar{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border-radius:8px;background:var(--surface);
+  border:1px solid var(--border);
+  margin-bottom:10px;cursor:pointer;
+  transition:background .15s,box-shadow .15s;
+  box-shadow:0 1px 4px var(--shadow);
+}
+.active-subject-bar:hover{background:var(--surface2);box-shadow:0 2px 8px var(--shadow)}
+.subj-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.active-subject-bar span{font-size:12px;font-weight:500;flex:1;letter-spacing:-.1px}
+.active-subject-bar small{font-size:10px;color:var(--muted)}
+
+.pills{display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
+.pills::-webkit-scrollbar{display:none}
+.pill{
+  padding:4px 9px;border-radius:20px;flex-shrink:0;
+  border:1px solid var(--border2);
+  background:var(--surface);font-size:13px;cursor:pointer;
+  color:var(--text);transition:all .15s;line-height:1;
+}
+.pill.active,.pill:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.spaces-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.space-card{
+  border-radius:8px;overflow:hidden;cursor:pointer;
+  border:1.5px solid transparent;transition:all .18s;
+  box-shadow:0 1px 4px var(--shadow);position:relative;
+}
+.space-card:hover{transform:scale(1.03);box-shadow:0 6px 18px var(--shadow)}
+.space-card:hover .space-thumb{transform:scale(1.1);filter:saturate(1) brightness(1);}
+.space-card:hover .space-thumb::before{opacity:0;}
+.space-card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.25)}
+/* offline: overlay oscuro vía ::before para no afectar z-index del indicador */
+.space-card.stream-offline{display:none !important;}
+.stream-indicator{
+  position:absolute;top:5px;left:5px;display:flex;align-items:center;gap:4px;
+  z-index:14;pointer-events:none;
+}
+.stream-dot{
+  width:7px;height:7px;border-radius:50%;display:block;flex-shrink:0;
+  background:transparent;
+}
+.stream-dot.red{
+  background:#ff3b30;
+  box-shadow:0 0 7px 3px rgba(255,59,48,.7);
+}
+.stream-dot.green{
+  background:#2ed158;
+  box-shadow:0 0 7px 3px rgba(46,209,88,.7);
+}
+.live-label{
+  font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  padding:2px 6px;border-radius:4px;
+  background:rgba(200,40,40,.88);color:#fff;
+  animation:blink-live 1.8s ease-in-out infinite;
+}
+@keyframes blink-live{0%,100%{opacity:1}50%{opacity:.18}}
+.space-thumb{
+  height:70px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;background-size:cover;background-position:center;
+  border-radius:6px;overflow:hidden;position:relative;
+  filter:saturate(.55) brightness(.82);
+  transition:transform .28s ease,filter .28s ease;
+}
+.space-thumb::before{
+  content:'';position:absolute;inset:0;
+  background:rgba(18,18,28,.46);
+  transition:opacity .28s ease;pointer-events:none;z-index:1;
+}
+.space-name{
+  font-size:10px;padding:4px 5px;
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(8px);
+  text-align:center;color:var(--muted);letter-spacing:-.1px;
+}
+
+.bg-cafe    {background:linear-gradient(135deg,#8b6e52,#4a3525)}
+.bg-biblio  {background:linear-gradient(135deg,#2c3e50,#34495e)}
+.bg-bosque  {background:linear-gradient(135deg,#1e5420,#3a8c30)}
+.bg-ciudad  {background:linear-gradient(135deg,#0f0c29,#302b63)}
+.bg-playa   {background:linear-gradient(135deg,#1a7ec0,#56c8e8)}
+.bg-lluvia  {background:linear-gradient(135deg,#3a4a5a,#5b7080)}
+.bg-lofi    {background:linear-gradient(135deg,#2d1b69,#11998e)}
+.bg-jardin  {background:linear-gradient(135deg,#134e5e,#71b280)}
+.bg-cdmx    {background:linear-gradient(135deg,#c0392b,#e67e22)}
+.bg-porteno {background:linear-gradient(135deg,#2c3e50,#8e9eab)}
+.bg-selva   {background:linear-gradient(135deg,#1a4d1a,#27ae60)}
+.bg-andino  {background:linear-gradient(135deg,#4568dc,#b06ab3)}
+
+/* ── SPACE AREA ── */
+.space-area{position:absolute;inset:0;overflow:hidden}
+#spaceBg{position:absolute;inset:0;transition:background 1.4s ease;background:linear-gradient(135deg,#8b6e52 0%,#4a3525 40%,#2d1a10 100%)}
+
+/* YouTube iframe fullscreen background */
+/* ── FULLSCREEN BUTTON ── */
+.fs-btn{
+  position:absolute;bottom:24px;right:48px;z-index:30;
+  width:34px;height:34px;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(14px) saturate(150%);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  border:1px solid rgba(255,255,255,.2);
+  border-right:none;border-radius:8px 0 0 8px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s,right .28s cubic-bezier(.4,0,.2,1),opacity .28s;
+  color:rgba(255,255,255,.85);padding:0;
+}
+.fs-btn:hover{background:rgba(0,0,0,.5);color:#fff;}
+.fs-btn svg{width:14px;height:14px;display:block;flex-shrink:0;}
+.fs-btn.sr-hidden{opacity:.38;}
+
+/* ── SIDEBAR TOGGLE TABS ── */
+.sidebar-toggle-btn{
+  position:absolute;top:0;bottom:0;margin:auto 0;
+  width:18px;height:52px;z-index:20;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(14px) saturate(150%);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  border:1px solid rgba(255,255,255,.2);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:rgba(255,255,255,.85);
+  padding:0;line-height:1;
+}
+.sidebar-toggle-btn:hover{background:rgba(0,0,0,.5);color:#fff;}
+.sidebar-toggle-btn.sl-toggle{
+  left:320px;
+  border-left:none;
+  border-radius:0 7px 7px 0;
+  transition:background .15s, color .15s, left .28s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-toggle-btn.sr-toggle{
+  right:64px;
+  border-right:none;
+  border-radius:7px 0 0 7px;
+  transition:background .15s, color .15s, right .28s cubic-bezier(.4,0,.2,1);
+}
+
+#ytFrame{
+  position:absolute;
+  top:50%; left:50%;
+  /* Contain 16:9 — franjas negras si la pantalla no es 16:9 */
+  width:min(100vw, calc((100vh - 48px) * 16 / 9));
+  height:min(calc(100vh - 48px), calc(100vw * 9 / 16));
+  transform:translate(-50%,-50%);
+  border:none; pointer-events:none; z-index:1;
+  opacity:0; transition:opacity .8s ease;
+}
+#ytFrame.loaded{opacity:1}
+
+/* overlay sutil para que los paneles contrasten */
+.space-overlay{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.18) 0%,transparent 30%,transparent 70%,rgba(0,0,0,.18) 100%);
+}
+.light-ray{position:absolute;top:-120px;right:60px;width:280px;height:420px;background:linear-gradient(180deg,rgba(255,220,140,.2) 0%,transparent 75%);transform:rotate(-14deg);animation:ray 8s ease-in-out infinite alternate;pointer-events:none;z-index:2}
+@keyframes ray{from{opacity:.45}to{opacity:.85}}
+.particle{position:absolute;border-radius:50%;background:rgba(255,220,140,.55);animation:rise linear infinite;pointer-events:none;z-index:2}
+@keyframes rise{0%{transform:translateY(110vh);opacity:0}8%{opacity:.7}92%{opacity:.3}100%{transform:translateY(-60px);opacity:0}}
+.space-chip{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:10;
+  background:rgba(0,0,0,.28);backdrop-filter:blur(16px) saturate(160%);
+  -webkit-backdrop-filter:blur(16px) saturate(160%);
+  color:rgba(255,255,255,.92);padding:5px 16px;border-radius:20px;
+  font-size:11.5px;letter-spacing:-.1px;white-space:nowrap;
+  border:1px solid rgba(255,255,255,.18);
+}
+
+.yt-vol-ctrl{
+  position:absolute;bottom:24px;left:320px;
+  z-index:20;
+  display:none;flex-direction:column;align-items:center;gap:9px;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-left:none;
+  border-radius:0 10px 10px 0;padding:10px 7px;
+  box-shadow:2px 0 12px var(--shadow);
+  transition:left .28s cubic-bezier(.4,0,.2,1), opacity .28s;
+}
+.yt-vol-ctrl.visible{display:flex;}
+.yt-vol-ctrl.sl-hidden{opacity:.38;}
+.yt-vol-btn{
+  background:none;border:none;color:var(--text);
+  font-size:14px;cursor:pointer;padding:0;line-height:1;
+  transition:opacity .15s;
+}
+.yt-vol-btn:hover{opacity:.55;}
+.yt-ctrl-btn{
+  background:none;border:none;color:var(--text);
+  font-size:15px;cursor:pointer;padding:0;line-height:1;
+  transition:opacity .15s;
+}
+.yt-ctrl-btn:hover{opacity:.55;}
+.yt-seek-row{
+  display:flex;flex-direction:column;gap:4px;align-items:center;
+}
+.yt-seek-btn{
+  background:rgba(0,0,0,.07);border:none;
+  color:var(--text);font-size:9px;font-weight:700;
+  cursor:pointer;padding:3px 5px;border-radius:5px;
+  line-height:1;letter-spacing:-.3px;
+  transition:background .12s;width:100%;text-align:center;
+}
+.yt-seek-btn:hover{background:rgba(0,0,0,.16);}
+.yt-ctrl-divider{
+  width:18px;height:1px;background:var(--border);margin:1px 0;
+}
+.yt-vol-slider{
+  writing-mode:vertical-lr;direction:rtl;
+  width:22px;height:76px;cursor:pointer;
+  accent-color:var(--accent);
+}
+
+/* space-card con badge YT */
+.yt-badge{
+  position:absolute;top:5px;right:5px;
+  background:rgba(255,0,0,.85);color:#fff;
+  font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;
+  letter-spacing:.2px;
+}
+
+/* Input URL YouTube */
+.yt-url-row{
+  display:flex;gap:5px;margin-top:10px;margin-bottom:4px;
+}
+.yt-url-input{
+  flex:1;padding:6px 9px;border:1px solid var(--border2);border-radius:7px;
+  background:var(--surface);font-size:11px;color:var(--text);outline:none;
+  font-family:inherit;transition:border .15s;
+}
+.yt-url-input:focus{border-color:red;box-shadow:0 0 0 2px rgba(255,0,0,.12)}
+.btn-yt-load{
+  padding:6px 10px;background:red;color:#fff;border:none;
+  border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;
+  white-space:nowrap;transition:filter .15s;
+}
+.btn-yt-load:hover{filter:brightness(1.15)}
+.yt-hint{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4}
+
+/* ── RIGHT SIDEBAR — lanzador delgado ── */
+.sr{
+  position:absolute;right:0;top:0;bottom:0;
+  width:64px;z-index:15;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:62px 0 14px;gap:7px;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.sr.collapsed{transform:translateX(100%);}
+.mod-launch-btn{
+  width:48px;height:48px;border-radius:11px;
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
+  font-size:18px;transition:all .15s;
+}
+.mod-launch-btn span{font-size:9.5px;color:var(--muted);letter-spacing:-.1px}
+.mod-launch-btn:hover{background:var(--bg2);}
+.mod-launch-btn.on{background:rgba(0,113,227,.08);border-color:rgba(0,113,227,.3);}
+.mod-launch-btn.on span{color:var(--accent);}
+
+/* ── MÓDULOS FLOTANTES ── */
+.module{
+  position:absolute;z-index:16;width:260px;
+  background:rgba(255,255,255,.93);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,.1);
+  user-select:none;
+}
+.module.hidden{display:none;}
+.module.dragging{cursor:grabbing !important;box-shadow:0 14px 40px rgba(0,0,0,.18);}
+.mod-particle-canvas{
+  position:absolute;left:-20px;top:-20px;
+  pointer-events:none;z-index:99;opacity:0;
+  transition:opacity .4s ease;
+}
+.module-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 11px;
+  background:rgba(0,0,0,.025);
+  border-bottom:1px solid var(--border);
+  border-radius:12px 12px 0 0;
+  overflow:hidden;
+  cursor:grab;
+  font-size:11px;font-weight:600;color:var(--text);letter-spacing:-.1px;
+  flex-shrink:0;
+}
+.module-header:active{cursor:grabbing;}
+.module-close{
+  background:none;border:none;cursor:pointer;
+  font-size:15px;line-height:1;color:var(--muted);
+  padding:0 1px;transition:color .15s;flex-shrink:0;
+}
+.module-close:hover{color:var(--text);}
+.module-body{overflow-y:auto;overflow-x:hidden;max-height:72vh;}
+.tool-panel{border-bottom:1px solid var(--border);padding:13px 14px;flex-shrink:0}
+.tool-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tool-title{font-size:12px;font-weight:600;color:var(--text);letter-spacing:-.1px}
+.tool-badge{font-size:11px;color:var(--muted)}
+
+/* Pomodoro */
+.pomo-modes{
+  display:flex;gap:1px;margin-bottom:12px;
+  background:rgba(0,0,0,.06);padding:3px;border-radius:8px;
+}
+.mode-btn{
+  flex:1;padding:4px 3px;border-radius:6px;border:none;
+  background:transparent;font-size:10px;cursor:pointer;
+  color:var(--muted);transition:all .15s;letter-spacing:-.1px;
+}
+.mode-btn.active{
+  background:#fff;color:var(--text);font-weight:500;
+  box-shadow:0 1px 4px rgba(0,0,0,.1);
+}
+.ring-wrap{position:relative;width:84px;height:84px;margin:0 auto 8px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-time{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:21px;font-weight:300;color:var(--text);letter-spacing:-1px;
+  font-variant-numeric:tabular-nums;
+}
+.ring-label{text-align:center;font-size:10px;color:var(--muted);letter-spacing:.2px;margin-bottom:10px}
+.pomo-btns{display:flex;gap:6px}
+.btn-start{
+  flex:1;padding:7px;background:var(--accent);color:#fff;border:none;
+  border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;
+  transition:filter .15s;letter-spacing:-.1px;
+}
+.btn-start:hover{filter:brightness(1.1)}
+.btn-reset{
+  padding:7px 11px;background:var(--bg2);border:none;
+  border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted);
+  transition:background .15s;
+}
+.btn-reset:hover{background:rgba(0,0,0,.1)}
+.pomo-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--bg2);transition:.3s}
+.dot.done{background:var(--accent)}
+
+/* Tasks */
+.task-input-row{display:flex;gap:5px;margin-bottom:8px}
+.task-input{
+  flex:1;padding:6px 9px;
+  border:1px solid var(--border2);border-radius:7px;
+  background:var(--surface);font-size:12px;color:var(--text);
+  outline:none;transition:border .15s;font-family:inherit;
+}
+.task-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.15)}
+.btn-add{
+  padding:6px 11px;background:var(--accent);color:#fff;border:none;
+  border-radius:7px;font-size:16px;cursor:pointer;line-height:1;
+  transition:filter .15s;
+}
+.btn-add:hover{filter:brightness(1.1)}
+
+.task-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.task-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  box-shadow:0 1px 3px var(--shadow);
+}
+.task-row{display:flex;align-items:center;gap:7px;padding:7px 9px}
+.t-check{
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:9px;
+  transition:all .15s;
+}
+.t-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.t-text{flex:1;font-size:12px;letter-spacing:-.1px}
+.t-text.done{text-decoration:line-through;color:var(--muted)}
+.expand-btn{
+  background:none;border:none;cursor:pointer;font-size:11px;
+  color:var(--muted);padding:0 2px;line-height:1;transition:color .15s;
+}
+.expand-btn:hover{color:var(--text)}
+.subtask-area{padding:0 9px 8px 30px;display:none;flex-direction:column;gap:5px}
+.subtask-area.open{display:flex}
+.subtask-row{display:flex;align-items:center;gap:6px}
+.st-check{
+  width:13px;height:13px;border-radius:3px;
+  border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:8px;
+  transition:all .15s;
+}
+.st-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.st-text{font-size:11px;color:var(--muted);flex:1}
+.st-text.done{text-decoration:line-through}
+.add-subtask{
+  background:none;border:none;font-size:11px;color:var(--accent);
+  cursor:pointer;padding:2px 0;text-align:left;transition:opacity .15s;
+}
+.add-subtask:hover{opacity:.7}
+
+/* Music */
+.music-card{
+  background:var(--surface2);border-radius:10px;padding:10px 12px;
+  border:1px solid var(--border);
+}
+.music-track{font-size:12px;font-weight:500;margin-bottom:1px;letter-spacing:-.15px}
+.music-sub{font-size:10.5px;color:var(--muted);margin-bottom:9px}
+.progress-bar{height:2px;background:var(--bg2);border-radius:2px;margin-bottom:9px;cursor:pointer}
+.progress-fill{height:100%;width:38%;background:var(--accent);border-radius:2px}
+.music-ctrl{display:flex;align-items:center;justify-content:center;gap:16px}
+.mctrl{background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);line-height:1;transition:color .15s}
+.mctrl:hover{color:var(--text)}
+.mctrl.main{
+  width:31px;height:31px;background:var(--text);border-radius:50%;
+  color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;
+  transition:transform .15s;
+}
+.mctrl.main:hover{transform:scale(1.07)}
+
+/* Sounds */
+.sounds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.sound-btn{
+  aspect-ratio:1;border-radius:9px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;font-size:17px;transition:all .15s;
+}
+.sound-btn span{font-size:9px;color:var(--muted);letter-spacing:-.1px}
+.sound-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.sound-btn.on{
+  background:rgba(0,113,227,.08);border-color:rgba(0,113,227,.3);
+}
+.sound-btn.on span{color:var(--accent);font-weight:500}
+.sound-item{display:flex;flex-direction:column;gap:0}
+.sound-vol{
+  width:100%;height:3px;accent-color:var(--accent);cursor:pointer;
+  opacity:0;pointer-events:none;transition:opacity .25s;margin-top:3px;
+}
+.sound-item:has(.sound-btn.on) .sound-vol{opacity:1;pointer-events:auto;}
+.t-del{
+  background:none;border:none;cursor:pointer;font-size:14px;line-height:1;
+  color:var(--muted);padding:0 2px;transition:color .15s;flex-shrink:0;
+}
+.t-del:hover{color:#ff3b30;}
+
+/* Notes */
+.notes-area{
+  width:100%;min-height:72px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);font-size:12px;color:var(--text);
+  resize:vertical;outline:none;font-family:inherit;line-height:1.55;
+}
+.notes-area:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.12)}
+
+/* ── NOVEDADES ── */
+#vNovedades{flex-direction:column;overflow-y:auto;padding:32px 36px;background:var(--bg)}
+.page-header{margin-bottom:20px}
+.page-header h1{font-size:22px;font-weight:600;margin-bottom:4px;letter-spacing:-.4px}
+.page-header p{font-size:12.5px;color:var(--muted)}
+.cat-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.cat-btn{
+  padding:5px 13px;border-radius:20px;
+  border:1px solid var(--border2);background:var(--surface);
+  font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s;
+}
+.cat-btn.active,.cat-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.news-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;transition:all .18s;cursor:pointer;
+  box-shadow:0 1px 4px var(--shadow);
+}
+.news-card:hover{
+  box-shadow:0 8px 24px rgba(0,0,0,.09);
+  transform:translateY(-2px);border-color:var(--border2);
+}
+.nc-thumb{height:92px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.nc-tag{
+  position:absolute;top:8px;left:8px;padding:2px 8px;border-radius:5px;
+  font-size:10px;font-weight:600;color:#fff;letter-spacing:.1px;
+}
+.tag-beca{background:rgba(52,199,89,.85)}
+.tag-tip{background:rgba(0,113,227,.85)}
+.tag-art{background:rgba(175,82,222,.85)}
+.tag-com{background:rgba(255,149,0,.85)}
+.nc-body{padding:12px 14px}
+.nc-title{font-size:13px;font-weight:600;margin-bottom:5px;line-height:1.35;letter-spacing:-.15px}
+.nc-desc{font-size:11.5px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.nc-footer{display:flex;align-items:center;justify-content:space-between}
+.nc-date{font-size:10.5px;color:var(--muted)}
+.nc-link{font-size:11.5px;color:var(--accent);font-weight:500;text-decoration:none}
+.nc-link:hover{text-decoration:underline}
+.btn-new-post{
+  padding:6px 14px;background:var(--accent);color:#fff;border:none;
+  border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;
+  transition:filter .15s;white-space:nowrap;letter-spacing:-.1px;
+}
+.btn-new-post:hover{filter:brightness(1.1)}
+
+/* ── ASIGNATURAS ── */
+#vAsignaturas{flex-direction:column;overflow-y:auto;padding:32px 36px;background:var(--bg)}
+.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.subj-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;position:relative;
+  box-shadow:0 1px 4px var(--shadow);
+}
+.subj-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.09);transform:translateY(-2px)}
+.subj-card.active-subj{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.2)}
+.sc-header{height:66px;display:flex;align-items:center;justify-content:center;font-size:30px;position:relative}
+.sc-active-badge{
+  position:absolute;top:7px;right:7px;
+  background:rgba(0,0,0,.3);backdrop-filter:blur(8px);
+  color:#fff;font-size:8.5px;font-weight:600;padding:2px 7px;
+  border-radius:5px;letter-spacing:.3px;
+}
+.sc-body{padding:11px 13px}
+.sc-name{font-size:13px;font-weight:600;margin-bottom:2px;letter-spacing:-.15px}
+.sc-teacher{font-size:11px;color:var(--muted);margin-bottom:6px}
+.sc-schedule{font-size:10.5px;color:var(--muted);margin-bottom:8px}
+.sc-progress{height:3px;background:var(--bg2);border-radius:3px;margin-bottom:4px;overflow:hidden}
+.sc-progress-fill{height:100%;border-radius:3px}
+.sc-prog-label{font-size:10px;color:var(--muted)}
+.btn-add-subj{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--surface);border:1.5px dashed var(--border2);
+  border-radius:12px;cursor:pointer;padding:22px;font-size:12.5px;
+  color:var(--muted);transition:all .15s;width:100%;
+}
+.btn-add-subj:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,113,227,.04)}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{
+  background:rgba(255,255,255,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-radius:14px;padding:24px;width:400px;max-width:90vw;
+  box-shadow:0 24px 60px rgba(0,0,0,.18);border:1px solid var(--border);
+}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:16px;letter-spacing:-.2px}
+.form-row{margin-bottom:13px}
+.form-row label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px;letter-spacing:.1px}
+.form-row input,.form-row select{
+  width:100%;padding:7px 10px;border:1px solid var(--border2);
+  border-radius:7px;background:var(--surface);font-size:12.5px;
+  color:var(--text);outline:none;font-family:inherit;transition:border .15s;
+}
+.form-row input:focus,.form-row select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.15)}
+.color-picker{display:flex;gap:7px;flex-wrap:wrap}
+.cp{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s}
+.cp.sel{border-color:var(--text);box-shadow:0 0 0 2px rgba(0,0,0,.15)}
+.icon-picker{display:flex;gap:6px;flex-wrap:wrap}
+.ip{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;
+  justify-content:center;font-size:18px;transition:all .15s;
+}
+.ip.sel{border-color:var(--accent);background:rgba(0,113,227,.07);box-shadow:0 0 0 2px rgba(0,113,227,.15)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn-cancel{
+  padding:7px 16px;border:1px solid var(--border2);border-radius:8px;
+  background:transparent;cursor:pointer;font-size:12px;color:var(--muted);transition:.15s;
+}
+.btn-cancel:hover{background:var(--bg2)}
+.btn-save{
+  padding:7px 16px;background:var(--accent);color:#fff;border:none;
+  border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;
+  transition:filter .15s;letter-spacing:-.1px;
+}
+.btn-save:hover{filter:brightness(1.1)}
+
+/* ── CALENDARIO ── */
+#vCalendario{flex-direction:row;overflow:hidden}
+.cal-left{
+  width:224px;flex-shrink:0;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-right:1px solid var(--border);padding:16px 13px;overflow-y:auto;
+}
+.cal-main{flex:1;overflow-y:auto;padding:22px 24px;background:var(--bg)}
+
+.mini-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mini-cal-header span{font-size:12px;font-weight:600;letter-spacing:-.2px}
+.mini-nav{
+  background:none;border:none;cursor:pointer;color:var(--muted);
+  font-size:15px;padding:2px 6px;border-radius:5px;line-height:1;transition:.15s;
+}
+.mini-nav:hover{background:var(--bg2);color:var(--text)}
+.mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.mini-day-label{font-size:8.5px;color:var(--muted);font-weight:500;padding:3px 0}
+.mini-day{font-size:11px;padding:4px 2px;border-radius:5px;cursor:pointer;transition:.12s;line-height:1}
+.mini-day:hover{background:var(--bg2)}
+.mini-day.today{background:var(--accent);color:#fff;font-weight:600}
+.mini-day.other-month{color:var(--border2)}
+.mini-day.has-event{position:relative}
+.mini-day.has-event::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--accent)}
+
+.legend-title{font-size:9.5px;font-weight:600;letter-spacing:.3px;color:var(--muted);text-transform:uppercase;margin:16px 0 7px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11.5px;margin-bottom:5px;color:var(--muted)}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.sync-btn{
+  width:100%;padding:7px 9px;border-radius:8px;
+  border:1px solid var(--border);background:var(--surface);
+  font-size:11.5px;cursor:pointer;display:flex;align-items:center;
+  gap:7px;margin-bottom:6px;transition:all .15s;color:var(--text);
+  box-shadow:0 1px 3px var(--shadow);
+}
+.sync-btn:hover{border-color:var(--border2);background:var(--surface2)}
+.sync-btn.connected{border-color:rgba(52,199,89,.5);background:rgba(52,199,89,.06)}
+.sync-status{font-size:10px;margin-left:auto}
+.status-ok{color:var(--green)}
+.status-off{color:var(--muted)}
+
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.cal-header h2{font-size:19px;font-weight:600;letter-spacing:-.4px}
+.cal-nav-group{display:flex;gap:5px;align-items:center}
+.cal-nav{
+  padding:5px 12px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;font-size:12px;transition:all .15s;color:var(--muted);
+  box-shadow:0 1px 3px var(--shadow);
+}
+.cal-nav:hover{background:var(--bg2);color:var(--text)}
+.cal-nav.today{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-new-event{
+  padding:6px 13px;background:var(--accent);color:#fff;border:none;
+  border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;
+  transition:filter .15s;letter-spacing:-.1px;
+}
+.btn-new-event:hover{filter:brightness(1.1)}
+
+.cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 6px var(--shadow);
+}
+.cal-day-label{background:var(--surface2);padding:7px 4px;text-align:center;font-size:10px;font-weight:500;color:var(--muted)}
+.cal-cell{background:var(--surface);min-height:84px;padding:6px;transition:.12s}
+.cal-cell:hover{background:var(--surface2)}
+.cal-cell.today{background:rgba(0,113,227,.04)}
+.cal-cell.today .cell-num{
+  background:var(--accent);color:#fff;border-radius:50%;
+  width:21px;height:21px;display:flex;align-items:center;justify-content:center;
+}
+.cal-cell.other-month{background:var(--bg2)}
+.cal-cell.other-month .cell-num{color:rgba(0,0,0,.15)}
+.cell-num{font-size:12px;font-weight:500;margin-bottom:4px;width:21px;height:21px;display:flex;align-items:center;justify-content:center}
+.cal-event{
+  font-size:9.5px;padding:2px 5px;border-radius:4px;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:.12s;
+}
+.cal-event:hover{filter:brightness(.92)}
+
+.event-form .form-row input[type="color"]{height:34px;padding:2px;cursor:pointer}
+
+/* ── Spotify module ── */
+#mod-spotify{width:352px;}
+.sp-input-row{
+  display:flex;gap:6px;padding:8px 10px;
+  border-top:1px solid var(--border);
+}
+.sp-input{
+  flex:1;font-size:11px;padding:5px 8px;
+  border:1px solid var(--border);border-radius:6px;
+  background:var(--surface);color:var(--text);outline:none;
+  transition:border-color .15s;
+}
+.sp-input:focus{border-color:#1DB954;}
+.sp-go{
+  background:#1DB954;color:#fff;border:none;
+  border-radius:6px;padding:5px 10px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  transition:opacity .15s;flex-shrink:0;
+}
+.sp-go:hover{opacity:.85;}
+
+/* ── Post-it talonario ── */
+.postit-pad-wrap{
+  padding:14px 16px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  cursor:grab;user-select:none;
+}
+.postit-pad-wrap:active{cursor:grabbing;}
+.postit-stack{
+  position:relative;width:80%;height:52px;
+}
+.stack-leaf{
+  position:absolute;inset:0;
+  border-radius:3px 3px 0 0;
+  box-shadow:0 2px 8px rgba(0,0,0,.14);
+}
+.stack-top{z-index:4;}
+.postit-hint{
+  font-size:10px;color:var(--muted);
+  margin:0;letter-spacing:-.1px;text-align:center;
+}
+
+/* ── Notas flotantes libres ── */
+.floating-postit{
+  position:absolute;z-index:20;
+  width:168px;min-height:120px;
+  border-radius:3px;
+  padding:14px 28px 10px 10px;
+  box-shadow:0 6px 20px rgba(0,0,0,.22),0 2px 6px rgba(0,0,0,.10),
+             inset 0 -4px 0 rgba(0,0,0,.07);
+  cursor:grab;user-select:none;
+  transition:box-shadow .2s ease;
+}
+.floating-postit:hover{
+  box-shadow:0 10px 32px rgba(0,0,0,.28),0 3px 10px rgba(0,0,0,.14),
+             inset 0 -4px 0 rgba(0,0,0,.07);
+}
+.floating-postit::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:7px;
+  background:rgba(0,0,0,.08);border-radius:3px 3px 0 0;
+  pointer-events:none;
+}
+.floating-postit.fp-dragging{
+  cursor:grabbing;
+  box-shadow:0 18px 50px rgba(0,0,0,.32),0 6px 16px rgba(0,0,0,.18);
+  z-index:25;
+}
+.floating-postit textarea{
+  background:transparent;border:none;outline:none;
+  resize:none;width:100%;min-height:76px;
+  font-size:12px;font-family:inherit;line-height:1.6;
+  color:rgba(0,0,0,.72);cursor:text;
+  pointer-events:auto;overflow:hidden;display:block;
+}
+.fp-del{
+  position:absolute;top:9px;right:7px;
+  background:none;border:none;cursor:pointer;
+  font-size:15px;color:rgba(0,0,0,.22);padding:0;line-height:1;
+  transition:color .15s;pointer-events:auto;
+}
+.fp-del:hover{color:rgba(0,0,0,.55);}
+@keyframes fp-drop{
+  from{transform:rotate(var(--rot)) scale(.88);opacity:.7;}
+  to  {transform:rotate(var(--rot)) scale(1);opacity:1;}
+}
+
+/* ══════════════════════════════════════════════
+   MODO CYBER — Rincón de Trabajo
+══════════════════════════════════════════════ */
+body.cyber{
+  --bg:#05050f;--bg2:#08081a;--surface:#0c0c22;--surface2:#0f0f2e;
+  --border:rgba(0,220,255,.16);--border2:rgba(0,220,255,.28);
+  --text:#f0f8ff;--muted:#a0bce0;--accent:#00e5ff;--accent2:#ff2ef8;
+  --green:#00ff88;--shadow:rgba(0,180,255,.18);
+}
+body.cyber ::-webkit-scrollbar-thumb{background:rgba(0,180,255,.22);}
+body.cyber .topbar{
+  background:rgba(7,7,26,.93)!important;
+  border-bottom:1px solid rgba(0,220,255,.22)!important;
+  box-shadow:0 0 28px rgba(0,180,255,.1),0 1px 0 rgba(0,180,255,.07);
+}
+body.cyber.cinema .topbar{background:rgba(7,7,26,0)!important;border-bottom-color:transparent!important;}
+body.cyber.cinema .topbar:hover{background:rgba(7,7,26,.93)!important;border-bottom-color:rgba(0,220,255,.22)!important;}
+body.cyber .logo{
+  font-family:'Courier New','SF Mono',monospace;color:#00e5ff;
+  text-shadow:0 0 10px rgba(0,200,255,.7),0 0 24px rgba(0,200,255,.35);
+  letter-spacing:1.5px;text-transform:uppercase;
+}
+body.cyber .logo em{color:#ff2ef8;text-shadow:0 0 9px rgba(255,46,248,.65);}
+body.cyber .nav-btn{color:#8aaace;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.2px;}
+body.cyber .nav-btn.active{background:rgba(0,220,255,.14);color:#00e5ff;font-weight:700;}
+body.cyber .nav-btn:hover{color:#00e5ff;background:rgba(0,220,255,.08);}
+body.cyber .btn-pro{background:rgba(255,46,248,.14);color:#ff2ef8;border:1px solid rgba(255,46,248,.4);font-weight:700;}
+body.cyber .avatar{border:2px solid #00e5ff;color:#00e5ff;box-shadow:0 0 10px rgba(0,200,255,.6);background:#070718;}
+body.cyber .sl,body.cyber .sr{
+  background:rgba(8,8,24,.97);
+  border-color:rgba(0,220,255,.12);
+}
+body.cyber .section-title{
+  color:#00e5ff;font-family:'Courier New',monospace;
+  font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;opacity:1;
+  text-shadow:0 0 8px rgba(0,200,255,.4);
+}
+body.cyber .sl-section{border-bottom:1px solid rgba(0,220,255,.07);}
+body.cyber .pills{gap:4px;}
+body.cyber .pill{
+  background:rgba(0,220,255,.05);border-color:rgba(0,220,255,.14);
+  color:#5a78a8;
+}
+body.cyber .pill.active{
+  background:rgba(0,220,255,.16);border-color:#00e5ff;color:#00e5ff;
+  box-shadow:0 0 8px rgba(0,200,255,.28);
+}
+body.cyber .pill:hover{background:rgba(0,220,255,.1);color:#00e5ff;}
+body.cyber .space-card{border-color:rgba(0,220,255,.14);background:rgba(8,8,28,.9);}
+body.cyber .space-card:hover{
+  box-shadow:0 0 20px rgba(0,200,255,.38),0 0 6px rgba(0,200,255,.18);
+  border-color:rgba(0,220,255,.5);
+}
+body.cyber .space-card.active{
+  border-color:#00e5ff;
+  box-shadow:0 0 0 2px rgba(0,220,255,.35),0 0 22px rgba(0,200,255,.22);
+}
+body.cyber .space-name{color:#b0d0f0;font-family:'Courier New',monospace;font-size:8.5px;letter-spacing:.3px;font-weight:600;}
+body.cyber .space-thumb{filter:saturate(1.3) brightness(.9);}
+body.cyber .section-title{font-size:10px;}
+body.cyber .module{
+  background:rgba(4,4,18,.97)!important;
+  backdrop-filter:blur(24px)!important;-webkit-backdrop-filter:blur(24px)!important;
+  border-color:rgba(0,220,255,.32);
+  box-shadow:0 0 30px rgba(0,180,255,.14),0 4px 24px rgba(0,0,0,.85),0 0 0 1px rgba(0,220,255,.07);
+}
+body.cyber .module-header{
+  background:rgba(0,220,255,.1)!important;
+  border-bottom:1px solid rgba(0,220,255,.25)!important;
+}
+body.cyber .module-header span{color:#00e5ff;font-family:'Courier New',monospace;font-size:11.5px;letter-spacing:.5px;font-weight:700;text-shadow:0 0 8px rgba(0,200,255,.5);}
+body.cyber .module-body{background:rgba(3,3,16,.98)!important;color:#f0f8ff;}
+body.cyber .module-close{color:#ff2ef8;font-weight:700;}
+body.cyber .module-close:hover{background:rgba(255,46,248,.18);}
+/* ── Módulos en cyber: contraste pleno ── */
+body.cyber .module-body{font-size:12.5px;}
+body.cyber .module-body label,
+body.cyber .module-body p,
+body.cyber .module-body small{color:#c8e4ff;}
+body.cyber .module-body span:not(.stream-dot):not(.ms-label):not(.s-label){color:#ddeeff;}
+/* Inputs */
+body.cyber .module-body input,
+body.cyber .module-body textarea{
+  background:rgba(0,30,50,.7)!important;
+  border-color:rgba(0,220,255,.35)!important;
+  color:#f0f8ff!important;caret-color:#00e5ff;
+}
+body.cyber .module-body input::placeholder,
+body.cyber .module-body textarea::placeholder{color:rgba(180,220,255,.4)!important;}
+/* Pomodoro: pill de modos */
+body.cyber .pomo-modes{background:rgba(0,0,0,.45);border:1px solid rgba(0,220,255,.15);border-radius:9px;}
+body.cyber .mode-btn{color:rgba(150,200,240,.65);}
+body.cyber .mode-btn.active{
+  background:rgba(0,220,255,.15);
+  color:#00e5ff;font-weight:700;
+  box-shadow:0 0 10px rgba(0,200,255,.3),inset 0 0 6px rgba(0,220,255,.1);
+  border-radius:6px;
+}
+/* Ring timer */
+body.cyber .ring-time{color:#ffffff;font-weight:400;text-shadow:0 0 12px rgba(0,220,255,.5);}
+body.cyber .ring-label{color:#8aaad0;letter-spacing:.5px;font-size:9.5px;text-transform:uppercase;}
+body.cyber .pomo-dots .dot{background:rgba(0,220,255,.2);}
+body.cyber .pomo-dots .dot.done{background:#00e5ff;box-shadow:0 0 5px rgba(0,200,255,.6);}
+/* Start / Reset buttons */
+body.cyber .btn-start{background:rgba(0,220,255,.18);color:#00e5ff;border:1px solid rgba(0,220,255,.45);font-weight:700;letter-spacing:.5px;text-shadow:none;box-shadow:0 0 14px rgba(0,200,255,.2);}
+body.cyber .btn-start:hover{background:rgba(0,220,255,.28);}
+body.cyber .btn-reset{background:rgba(255,46,248,.1);color:#ff2ef8;border:1px solid rgba(255,46,248,.3);}
+body.cyber .btn-reset:hover{background:rgba(255,46,248,.2);}
+/* Sound buttons */
+body.cyber .sound-btn{background:rgba(0,15,30,.8);border-color:rgba(0,220,255,.18);color:#f0f8ff;}
+body.cyber .sound-btn span{color:#8aaad0;font-size:10px;}
+body.cyber .sound-btn:hover{background:rgba(0,220,255,.1);border-color:rgba(0,220,255,.4);}
+body.cyber .sound-btn.on{background:rgba(0,220,255,.14);border-color:#00e5ff;box-shadow:0 0 10px rgba(0,200,255,.25);}
+body.cyber .sound-btn.on span{color:#00e5ff;}
+/* Task items */
+body.cyber .task-item{background:rgba(0,12,28,.8);border-color:rgba(0,220,255,.14);}
+body.cyber .t-text{color:#ddeeff;}
+body.cyber .t-check{border-color:rgba(0,220,255,.35);}
+body.cyber .t-check.done{background:#00e5ff;border-color:#00e5ff;color:#000;}
+/* General cycles / text */
+body.cyber .pomo-cycles{color:#8aaad0;font-size:11px;}
+/* Spotify module */
+body.cyber .sp-input{background:rgba(0,15,30,.8)!important;border-color:rgba(0,220,255,.3)!important;color:#f0f8ff!important;}
+body.cyber .sp-go{background:rgba(0,220,255,.18)!important;color:#00e5ff!important;border:1px solid rgba(0,220,255,.4)!important;}
+body.cyber .active-subject-bar{background:rgba(0,220,255,.06);border-color:rgba(0,220,255,.18);}
+body.cyber .active-subject-bar:hover{background:rgba(0,220,255,.11);}
+body.cyber .yt-vol-ctrl{
+  background:rgba(8,8,24,.92);border-color:rgba(0,220,255,.24);
+  box-shadow:2px 0 18px rgba(0,180,255,.12);
+}
+body.cyber .yt-ctrl-divider{background:rgba(0,220,255,.2);}
+body.cyber .yt-seek-btn{background:rgba(0,220,255,.08);}
+body.cyber .yt-seek-btn:hover{background:rgba(0,220,255,.2);}
+body.cyber .floating-postit{border-color:rgba(0,220,255,.25)!important;box-shadow:0 0 14px rgba(0,180,255,.14)!important;}
+body.cyber #ytFrame{filter:contrast(1.06) saturate(1.12);}
+body.cyber #cyberCanvas{display:block!important;}
+body.cyber .view::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.055) 3px,rgba(0,0,0,.055) 4px);
+  pointer-events:none;z-index:6;
+}
+body.cyber .space-chip{
+  background:rgba(0,220,255,.1);border:1px solid rgba(0,220,255,.3);
+  color:#00e5ff;font-family:'Courier New',monospace;font-size:10px;
+  text-shadow:0 0 6px rgba(0,200,255,.5);
+}
+/* Mode switch pill */
+.mode-switch{
+  display:flex;align-items:center;gap:7px;
+  margin-left:12px;cursor:pointer;
+  padding:4px 10px 4px 6px;border-radius:20px;
+  border:1px solid var(--border2);background:var(--surface);
+  transition:all .3s;user-select:none;
+}
+.mode-switch:hover{border-color:var(--accent);}
+.ms-track{
+  width:30px;height:17px;background:var(--bg2);border-radius:9px;
+  position:relative;border:1px solid var(--border2);transition:all .28s;flex-shrink:0;
+}
+.ms-thumb{
+  width:13px;height:13px;background:var(--muted);border-radius:50%;
+  position:absolute;top:1px;left:1px;
+  transition:all .28s cubic-bezier(.4,0,.2,1);
+}
+.ms-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.3px;transition:color .28s;white-space:nowrap;}
+body.cyber .mode-switch{
+  border-color:rgba(0,220,255,.32);background:rgba(0,220,255,.06);
+  box-shadow:0 0 12px rgba(0,200,255,.1);
+}
+body.cyber .ms-track{background:rgba(0,220,255,.18);border-color:rgba(0,220,255,.28);}
+body.cyber .ms-thumb{background:#00e5ff;left:15px;box-shadow:0 0 8px rgba(0,200,255,.9);}
+body.cyber .ms-label{color:#00e5ff;font-family:'Courier New',monospace;}
+/* Cyber vs Study spaces visibility */
+#cyberSpaces{display:none;}
+body.cyber #studySpaces{display:none;}
+body.cyber #cyberSpaces{display:block;}
+/* Cyber thumb gradients */
+.bg-neotokyo{background:linear-gradient(135deg,#0a001f,#1a003a,#2a0050);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-gridrunner{background:linear-gradient(135deg,#000a18,#001a30,#00253a);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-voiddeck{background:linear-gradient(135deg,#050520,#0a0a40,#10105a);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-neonnoir{background:linear-gradient(135deg,#1a0005,#2a0018,#1a0030);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-digitalrain{background:linear-gradient(135deg,#001800,#002a08,#000a00);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-vapordream{background:linear-gradient(135deg,#1a0a30,#3a1a70,#6a1a9a);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-bladerunner{background:linear-gradient(135deg,#1a0a00,#3a1800,#2a0a1a);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.bg-chromevoid{background:linear-gradient(135deg,#0a0a20,#151530,#202040);display:flex;align-items:center;justify-content:center;font-size:22px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ TOPBAR ═══════════════════ -->
+<header class="topbar">
+  <div class="logo" id="appLogo">🌿 Rincón <em id="appLogoSub">de Estudio</em></div>
+  <div class="mode-switch" onclick="toggleCyberMode()" id="modeSwitch" title="Cambiar a Modo Trabajo">
+    <div class="ms-track"><div class="ms-thumb"></div></div>
+    <span class="ms-label" id="msLabel">ESTUDIO</span>
+  </div>
+  <nav class="topbar-nav">
+    <button class="nav-btn active" onclick="switchView('vFocus',this)">🏠 Enfoque</button>
+    <button class="nav-btn" onclick="switchView('vNovedades',this)">📰 Novedades</button>
+    <button class="nav-btn" onclick="switchView('vAsignaturas',this)">📚 Asignaturas</button>
+    <button class="nav-btn" onclick="switchView('vCalendario',this)">📅 Calendario</button>
+  </nav>
+  <div class="topbar-right">
+    <button class="btn-pro">✨ Pro</button>
+    <div class="avatar">M</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════
+     VISTA 1: ENFOQUE
+═══════════════════════════════════════════════ -->
+<div class="view active" id="vFocus">
+
+  <!-- LEFT -->
+  <aside class="sl">
+    <!-- Active subject -->
+    <div class="section-title">📌 Asignatura activa</div>
+    <div class="active-subject-bar" onclick="switchView('vAsignaturas',null)">
+      <div class="subj-dot" id="focusSubjDot" style="background:#c96a20"></div>
+      <span id="focusSubjName">Cálculo II</span>
+      <small>cambiar →</small>
+    </div>
+
+    <!-- Spaces -->
+    <div id="studySpaces">
+    <div class="section-title">🌿 Espacios</div>
+    <div class="pills">
+      <button class="pill active" onclick="filterSpaces(this,'todos')">🌐</button>
+      <button class="pill" onclick="filterSpaces(this,'lofi')">🎧</button>
+      <button class="pill" onclick="filterSpaces(this,'espacio')">🚀</button>
+      <button class="pill" onclick="filterSpaces(this,'tokyo')">🗼</button>
+      <button class="pill" onclick="filterSpaces(this,'anime')">🌸</button>
+      <button class="pill" onclick="filterSpaces(this,'cafe')">☕</button>
+      <button class="pill" onclick="filterSpaces(this,'biblioteca')">📚</button>
+      <button class="pill" onclick="filterSpaces(this,'trabajo')">💼</button>
+      <button class="pill" onclick="filterSpaces(this,'lluvia')">🌧️</button>
+      <button class="pill" onclick="filterSpaces(this,'natura')">🌿</button>
+      <button class="pill" onclick="shuffleStream()" title="Stream aleatorio">🔀</button>
+    </div>
+    <div class="sl-section">
+    <div class="spaces-grid" id="spacesGrid">
+      <div class="space-card active" data-tag="cafe" data-name="Café Tranquilo" data-bg="linear-gradient(135deg,#8b6e52 0%,#4a3525 40%,#2d1a10 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-cafe">☕</div><div class="space-name">Café Tranquilo</div></div>
+      <div class="space-card" data-tag="natura" data-name="Bosque Lluvioso" data-bg="linear-gradient(135deg,#1a4d1a 0%,#2e7d2e 50%,#0d2b0d 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-bosque">🌿</div><div class="space-name">Bosque Lluvioso</div></div>
+      <div class="space-card" data-tag="lofi" data-name="Ciudad Nocturna" data-bg="linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#080614 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-ciudad">🌃</div><div class="space-name">Ciudad Nocturna</div></div>
+      <div class="space-card" data-tag="biblioteca" data-name="Biblioteca" data-bg="linear-gradient(135deg,#2c3e50 0%,#34495e 60%,#1a2535 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-biblio">📚</div><div class="space-name">Biblioteca</div></div>
+      <div class="space-card" data-tag="natura" data-name="Playa Atardecer" data-bg="linear-gradient(135deg,#1a7ec0 0%,#f08030 50%,#c04010 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-playa">🌊</div><div class="space-name">Playa Atardecer</div></div>
+      <div class="space-card" data-tag="lluvia" data-name="Lluvia en Casa" data-bg="linear-gradient(135deg,#3a4a5a 0%,#5b7080 60%,#2a3545 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-lluvia">🌧️</div><div class="space-name">Lluvia en Casa</div></div>
+      <div class="space-card" data-tag="lofi" data-name="Lo-Fi Animado" data-bg="linear-gradient(135deg,#2d1b69 0%,#11998e 60%,#1a0e4a 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-lofi">🎵</div><div class="space-name">Lo-Fi Animado</div></div>
+      <div class="space-card" data-tag="natura" data-name="Jardín Secreto" data-bg="linear-gradient(135deg,#134e5e 0%,#71b280 60%,#0c3040 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-jardin">🌸</div><div class="space-name">Jardín Secreto</div></div>
+    </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🌎 Espacios Latinos</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="cafe" data-name="Mercado CDMX" data-bg="linear-gradient(135deg,#c0392b 0%,#e67e22 60%,#7d2418 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-cdmx">🌮</div><div class="space-name">Mercado CDMX</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Porteño" data-bg="linear-gradient(135deg,#2c3e50 0%,#8e9eab 60%,#1a2535 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-porteno">🐂</div><div class="space-name">Café Porteño</div></div>
+        <div class="space-card" data-tag="natura" data-name="Selva Amazónica" data-bg="linear-gradient(135deg,#1a4d1a 0%,#27ae60 50%,#0d2b0d 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-selva">🦜</div><div class="space-name">Selva Amazónica</div></div>
+        <div class="space-card" data-tag="natura" data-name="Altiplano Andino" data-bg="linear-gradient(135deg,#4568dc 0%,#b06ab3 60%,#1a2870 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-andino">⛰️</div><div class="space-name">Altiplano Andino</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🎧 Lofi Clásico</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="lofi" data-name="Lofi Girl" data-yt="jfKfPfyJRdk" data-bg="linear-gradient(135deg,#2d1b69,#11998e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Girl</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Universe" data-yt="lglp8p685Lg" data-bg="linear-gradient(135deg,#0a0a1a,#1a0a3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Universe</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Anime Lofi 24/7" data-yt="WDXPJWIgX-o" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Anime Lofi</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Anime & Videojuegos" data-yt="7g_02XViuSc" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Anime & Games</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Synthwave City" data-yt="4xDzrJKXOOY" data-bg="linear-gradient(135deg,#0f0c29,#302b63)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Synthwave City</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lo-Fi Latino" data-yt="5qap5aO4i9A" data-bg="linear-gradient(135deg,#c0392b,#e67e22)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lo-Fi Latino</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Hip Hop 2021" data-yt="n61ULEU7CO0" data-bg="linear-gradient(135deg,#2d1b69,#11998e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Hip Hop</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Sleep Radio" data-yt="DWcJFNfaw9c" data-bg="linear-gradient(135deg,#0a0a1a,#1a0a3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Sleep Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Chill Radio" data-yt="rUxyKA_-grg" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Chill Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Chill Lofi Mix" data-yt="CLeZyIID9Bo" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chill Lofi Mix</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Study Radio" data-yt="hHW1oY26kxQ" data-bg="linear-gradient(135deg,#2d1b69,#6e3a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Study Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Chillhop Radio" data-yt="5yx6BWlEVcY" data-bg="linear-gradient(135deg,#1a3a2a,#2e7d5e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chillhop Radio</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🚀 Espacio & Universo</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="espacio" data-name="Sci-Fi Beats" data-yt="mrgBMus4_ZY" data-bg="linear-gradient(135deg,#020b18,#0a2744)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Sci-Fi Beats</div></div>
+        <div class="space-card" data-tag="espacio" data-name="Estación Espacial" data-yt="GI6XXLpVdxc" data-bg="linear-gradient(135deg,#010a14,#051e35)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Estación Espacial</div></div>
+        <div class="space-card" data-tag="espacio" data-name="Radio Interestelar" data-yt="lhRhDxUSe7c" data-bg="linear-gradient(135deg,#05001a,#1a0050)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Radio Interestelar</div></div>
+        <div class="space-card" data-tag="espacio" data-name="Space Lofi" data-yt="YjBVoG7JDBk" data-bg="linear-gradient(135deg,#0f0c29,#302b63)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Space Lofi</div></div>
+        <div class="space-card" data-tag="espacio" data-name="Dark Ambient Radio" data-yt="S_MOd40zlYU" data-bg="linear-gradient(135deg,#05001a,#1a0050)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Ambient</div></div>
+        <div class="space-card" data-tag="espacio" data-name="Synthwave Radio" data-yt="MVPTGNGiI-4" data-bg="linear-gradient(135deg,#0f0c29,#6a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Synthwave Radio</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🗼 Tokyo & Japón</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="tokyo" data-name="Lofi Japan 24/7" data-yt="RzFQ68_WKUE" data-bg="linear-gradient(135deg,#1a2a3a,#2a4a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Japan</div></div>
+        <div class="space-card" data-tag="tokyo" data-name="Lluvia en Tokyo" data-yt="0ba7dl40tSQ" data-bg="linear-gradient(135deg,#2a3545,#1a2535)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lluvia en Tokyo</div></div>
+        <div class="space-card" data-tag="tokyo" data-name="Lost in Japan" data-yt="dwH5Q-H79bc" data-bg="linear-gradient(135deg,#1a1a2e,#16213e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lost in Japan</div></div>
+        <div class="space-card" data-tag="tokyo" data-name="Seattle Ghibli" data-yt="nYYp3kN2A-M" data-bg="linear-gradient(135deg,#2c3e50,#3d566e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Seattle Ghibli</div></div>
+        <div class="space-card" data-tag="tokyo" data-name="Tokyo Café Jazz" data-yt="6uddGul0oAc" data-bg="linear-gradient(135deg,#1a2a3a,#3a2a1a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Tokyo Café Jazz</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🌸 Ghibli & Anime</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="anime" data-name="Totoro Lofi" data-yt="t7sHkRIPEFE" data-bg="linear-gradient(135deg,#134e5e,#71b280)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Totoro Lofi</div></div>
+        <div class="space-card" data-tag="anime" data-name="Librería Ghibli" data-yt="6LvBZbZrgfo" data-bg="linear-gradient(135deg,#2c3e50,#4a6741)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Librería Ghibli</div></div>
+        <div class="space-card" data-tag="anime" data-name="Ciudad Ghibli" data-yt="-Sj0ieg9bdg" data-bg="linear-gradient(135deg,#1c1c2e,#16213e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Ciudad Ghibli</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">☕ Café</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="cafe" data-name="Noche de Invierno" data-yt="iiOqs6dz9qo" data-bg="linear-gradient(135deg,#1a2a4a,#2a3a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Noche de Invierno</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Nevado" data-yt="R_INkw1quiI" data-bg="linear-gradient(135deg,#2a3a5a,#3a5a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Nevado</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café París" data-yt="Dx5qFachd3A" data-bg="linear-gradient(135deg,#8b6e52,#4a3525)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café París</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Radio Café 24/7" data-yt="blAFxjhg62k" data-bg="linear-gradient(135deg,#5c3a1e,#2e1a0e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Radio Café</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Lofi Jazz" data-yt="mwPR8aizAyo" data-bg="linear-gradient(135deg,#3e2a1a,#1e0f05)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Lofi Jazz</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Lofi 24/7" data-yt="k_WFvuN6tco" data-bg="linear-gradient(135deg,#6e4c2a,#3a2010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Lofi</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Lluvioso" data-yt="2VpxLXyyxn0" data-bg="linear-gradient(135deg,#3a4550,#1e2830)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Lluvioso</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Rainy Day Café" data-yt="DEWzT1geuPU" data-bg="linear-gradient(135deg,#4a3a2a,#2a1a10)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Day Café</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Acogedor" data-yt="BMMEasDJrZo" data-bg="linear-gradient(135deg,#7a5035,#3a2015)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Acogedor</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Café Nocturno" data-yt="q1C-MLuzOzw" data-bg="linear-gradient(135deg,#1a1a2e,#2a1510)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Nocturno</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Coffee Jazz 24/7" data-yt="fEvM-OUbaKs" data-bg="linear-gradient(135deg,#3e2010,#6e4020)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Coffee Jazz 24/7</div></div>
+        <div class="space-card" data-tag="cafe" data-name="Rainy Jazz Café" data-yt="NJuSStkIZBg" data-bg="linear-gradient(135deg,#2a3545,#3a4a30)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Jazz Café</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">📚 Biblioteca</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="biblioteca" data-name="Hogwarts Pomodoro" data-yt="RcJ76_OLNoc" data-bg="linear-gradient(135deg,#1a1520,#2d1b40)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Hogwarts Pomodoro</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Hogwarts 4K" data-yt="oo_b4EkzQhM" data-bg="linear-gradient(135deg,#0e0d1a,#1f1a30)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Hogwarts 4K</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Slytherin Study" data-yt="LCwQUQu7iOs" data-bg="linear-gradient(135deg,#0d2818,#1a4030)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Slytherin Study</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Hogwarts ASMR" data-yt="bwSibZ8mnrQ" data-bg="linear-gradient(135deg,#1c1520,#2e1f38)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Hogwarts ASMR</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Dark Academia Night" data-yt="JSMbtfpoaWI" data-bg="linear-gradient(135deg,#1a1510,#352a20)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Academia</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Law Library Rain" data-yt="c20ytQ3BOiA" data-bg="linear-gradient(135deg,#1e2830,#2c3e50)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Law Library Rain</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Dark Academia 8H" data-yt="XsBTTTQeafQ" data-bg="linear-gradient(135deg,#15100e,#2a201a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Academia 8H</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="1AM Study Session" data-yt="lTRiuFIWV54" data-bg="linear-gradient(135deg,#0e0d1a,#2d1b40)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">1AM Study Session</div></div>
+        <div class="space-card" data-tag="biblioteca" data-name="Piano para Estudiar" data-yt="lCOF9LN_Zxs" data-bg="linear-gradient(135deg,#1e2830,#1a1520)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Piano para Estudiar</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">💼 Trabajo & Foco</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="trabajo" data-name="Lofi Work 24/7" data-yt="ByZGu229-yA" data-bg="linear-gradient(135deg,#1a2035,#2d4a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Work 24/7</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Deep Work 24/7" data-yt="a_7CxCnXbCY" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Work 24/7</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Coding Bora Bora" data-yt="zSCPJuZKlFw" data-bg="linear-gradient(135deg,#004d60,#00bcd4)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Coding Bora Bora</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Cyberpunk Dark" data-yt="3watZEdqp_c" data-bg="linear-gradient(135deg,#0d0221,#1a0040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyberpunk Dark</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Chill Beats Live" data-yt="uOqGBYs4VAc" data-bg="linear-gradient(135deg,#1a2a3a,#2a3a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chill Beats Live</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Bosque Japón" data-yt="f4wkXCpoRtg" data-bg="linear-gradient(135deg,#0d2010,#1a3820)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Bosque Japón</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Code.fi Lofi" data-yt="f02mOEt11OQ" data-bg="linear-gradient(135deg,#0d1b2a,#0a2744)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Code.fi Lofi</div></div>
+        <div class="space-card" data-tag="trabajo" data-name="Brown Noise 8H" data-yt="RqzGzwTY-6w" data-bg="linear-gradient(135deg,#1a1510,#2e2a20)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Brown Noise 8H</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🌧️ Lluvia</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="lluvia" data-name="Lluvia Tokyo" data-yt="mPZkdNFkNps" data-bg="linear-gradient(135deg,#2a3545,#1a2535)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lluvia Tokyo</div></div>
+        <div class="space-card" data-tag="lluvia" data-name="Rainy Lofi" data-yt="vYIYIVmOo3Q" data-bg="linear-gradient(135deg,#1e2d3a,#2e4555)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Lofi</div></div>
+        <div class="space-card" data-tag="lluvia" data-name="Lighthouse Rain" data-yt="TBe-N9AU7zU" data-bg="linear-gradient(135deg,#1a2a4a,#2a4a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lighthouse Rain</div></div>
+        <div class="space-card" data-tag="lluvia" data-name="Rain 24H" data-yt="4ExjdcfWAzE" data-bg="linear-gradient(135deg,#152030,#253545)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rain 24H</div></div>
+        <div class="space-card" data-tag="lluvia" data-name="Lluvia Suave 3H" data-yt="q76bMs-NwRk" data-bg="linear-gradient(135deg,#1e2d3a,#152030)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lluvia Suave 3H</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🌿 Naturaleza</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="natura" data-name="Bosque & Jazz" data-yt="ZTLz_pTYhvo" data-bg="linear-gradient(135deg,#1a4d1a,#2e7d2e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Bosque & Jazz</div></div>
+        <div class="space-card" data-tag="natura" data-name="Jardín Primavera" data-yt="ca_U2756IP8" data-bg="linear-gradient(135deg,#2a5a1a,#4a8a2e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Jardín Primavera</div></div>
+        <div class="space-card" data-tag="natura" data-name="Naturaleza 24/7" data-yt="FwRSkjyPIZo" data-bg="linear-gradient(135deg,#134e5e,#71b280)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Naturaleza 24/7</div></div>
+        <div class="space-card" data-tag="natura" data-name="Sonidos del Bosque" data-yt="eKFTSSKCzWA" data-bg="linear-gradient(135deg,#1a4d1a,#3a6e3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Sonidos del Bosque</div></div>
+      </div>
+    </div>
+
+    </div><!-- /#studySpaces -->
+
+    <!-- ══ CYBER SPACES ══ -->
+    <div id="cyberSpaces">
+      <div class="section-title">⚡ ENTORNOS</div>
+      <div class="pills">
+        <button class="pill active" onclick="filterSpaces(this,'todos')">◈</button>
+        <button class="pill" onclick="filterSpaces(this,'synth')">🎛</button>
+        <button class="pill" onclick="filterSpaces(this,'cyber')">⚡</button>
+        <button class="pill" onclick="filterSpaces(this,'vapor')">💜</button>
+        <button class="pill" onclick="filterSpaces(this,'techno')">🖤</button>
+        <button class="pill" onclick="filterSpaces(this,'glitch')">🔴</button>
+        <button class="pill" onclick="shuffleStream()" title="Aleatorio">🔀</button>
+      </div>
+      <div class="sl-section">
+        <div class="spaces-grid">
+          <div class="space-card" data-tag="cyber" data-name="Neo-Tokyo" data-bg="linear-gradient(135deg,#0a001f,#1a003a,#2a0050)" onclick="selectSpace(this)"><div class="space-thumb bg-neotokyo">🌆</div><div class="space-name">Neo-Tokyo</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Grid Runner" data-bg="linear-gradient(135deg,#000a18,#001a30,#00253a)" onclick="selectSpace(this)"><div class="space-thumb bg-gridrunner">▦</div><div class="space-name">Grid Runner</div></div>
+          <div class="space-card" data-tag="glitch" data-name="Void Deck" data-bg="linear-gradient(135deg,#050520,#0a0a40,#10105a)" onclick="selectSpace(this)"><div class="space-thumb bg-voiddeck">◉</div><div class="space-name">Void Deck</div></div>
+          <div class="space-card" data-tag="glitch" data-name="Neon Noir" data-bg="linear-gradient(135deg,#1a0005,#2a0018,#1a0030)" onclick="selectSpace(this)"><div class="space-thumb bg-neonnoir">🔴</div><div class="space-name">Neon Noir</div></div>
+          <div class="space-card" data-tag="techno" data-name="Digital Rain" data-bg="linear-gradient(135deg,#001800,#002a08,#000a00)" onclick="selectSpace(this)"><div class="space-thumb bg-digitalrain">⬇</div><div class="space-name">Digital Rain</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Vapor Dreams" data-bg="linear-gradient(135deg,#1a0a30,#3a1a70,#6a1a9a)" onclick="selectSpace(this)"><div class="space-thumb bg-vapordream">💜</div><div class="space-name">Vapor Dreams</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Blade Runner" data-bg="linear-gradient(135deg,#1a0a00,#3a1800,#2a0a1a)" onclick="selectSpace(this)"><div class="space-thumb bg-bladerunner">🌧</div><div class="space-name">Blade Runner</div></div>
+          <div class="space-card" data-tag="techno" data-name="Chrome Void" data-bg="linear-gradient(135deg,#0a0a20,#151530,#202040)" onclick="selectSpace(this)"><div class="space-thumb bg-chromevoid">⬡</div><div class="space-name">Chrome Void</div></div>
+        </div>
+      </div>
+      <div class="sl-section">
+        <div class="section-title">🎛 SYNTHWAVE / DARK SYNTH</div>
+        <div class="spaces-grid">
+          <div class="space-card" data-tag="synth" data-name="Cyber Grid" data-yt="pnVRrq06t2U" data-bg="linear-gradient(135deg,#0a0530,#1e0a60,#300a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Grid</div></div>
+          <div class="space-card" data-tag="synth" data-name="Dark Signal" data-yt="EflFUfrYJVE" data-bg="linear-gradient(135deg,#120030,#280060,#1a004a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Signal</div></div>
+          <div class="space-card" data-tag="synth" data-name="Outrun Drive" data-yt="zQ0MhOnVW4c" data-bg="linear-gradient(135deg,#0a0520,#2a0a5a,#4a0a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Outrun Drive</div></div>
+          <div class="space-card" data-tag="synth" data-name="Neon Horizon" data-yt="UedTcufyrHc" data-bg="linear-gradient(135deg,#1a0a30,#3a1060,#0a0a2a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Horizon</div></div>
+          <div class="space-card" data-tag="synth" data-name="Retro Override" data-yt="b3P_8GWq_i0" data-bg="linear-gradient(135deg,#0d0221,#1a0040,#2a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Retro Override</div></div>
+          <div class="space-card" data-tag="synth" data-name="Power Grid" data-yt="xFvFpFGpbPY" data-bg="linear-gradient(135deg,#000a2a,#001a4a,#00254a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Power Grid</div></div>
+          <div class="space-card" data-tag="synth" data-name="Dark Electro" data-yt="OQnHNzJdHrU" data-bg="linear-gradient(135deg,#0a0028,#1a0050,#2a0060)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Electro</div></div>
+          <div class="space-card" data-tag="synth" data-name="Synth Overdrive" data-yt="x9OBM1OAQOE" data-bg="linear-gradient(135deg,#14002a,#280052,#1a0040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Synth Overdrive</div></div>
+          <div class="space-card" data-tag="synth" data-name="Electric Pulse" data-yt="kLCeQqv5G4o" data-bg="linear-gradient(135deg,#080020,#180048,#200058)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electric Pulse</div></div>
+          <div class="space-card" data-tag="synth" data-name="Neon Signal" data-yt="jzEN2VIE9Fo" data-bg="linear-gradient(135deg,#0a001e,#1e0048,#2a005a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Signal</div></div>
+        </div>
+      </div>
+      <div class="sl-section">
+        <div class="section-title">⚡ CYBERPUNK / DARK WAVE</div>
+        <div class="spaces-grid">
+          <div class="space-card" data-tag="cyber" data-name="Dark Electro" data-yt="34H1XIjnfKM" data-bg="linear-gradient(135deg,#050010,#0f0030,#18004a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Electro</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Neon Underground" data-yt="AswR2woOGj0" data-bg="linear-gradient(135deg,#080018,#160030,#200040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Underground</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Void Protocol" data-yt="TuOHPaR0bDI" data-bg="linear-gradient(135deg,#050014,#0d002c,#160040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Void Protocol</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Blackout" data-yt="wpVBjOvmrZU" data-bg="linear-gradient(135deg,#060010,#10002a,#180038)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Blackout</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Neural Hack" data-yt="V_aFPWqMwho" data-bg="linear-gradient(135deg,#001400,#002800,#001a0a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neural Hack</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Signal Lost" data-yt="IRrj1IzNSVQ" data-bg="linear-gradient(135deg,#040010,#0c0028,#140034)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Signal Lost</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Zero Point" data-yt="PZtBZLQ8lGk" data-bg="linear-gradient(135deg,#020008,#080018,#0e0024)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Zero Point</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Matrix Feed" data-yt="XOO5CFZM8AI" data-bg="linear-gradient(135deg,#001200,#002200,#001800)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Matrix Feed</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Neural Grid" data-yt="mWzXg0mFQ9g" data-bg="linear-gradient(135deg,#060012,#12002a,#1a0036)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neural Grid</div></div>
+          <div class="space-card" data-tag="cyber" data-name="Core Override" data-yt="N_E1kqR5kSA" data-bg="linear-gradient(135deg,#080020,#1a003a,#0a001a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Core Override</div></div>
+        </div>
+      </div>
+      <div class="sl-section">
+        <div class="section-title">💜 VAPORWAVE / A E S T H E T I C</div>
+        <div class="spaces-grid">
+          <div class="space-card" data-tag="vapor" data-name="Vaporwave Radio" data-yt="PXtu8s8uHB4" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e,#6e1a9a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Vaporwave Radio</div></div>
+          <div class="space-card" data-tag="vapor" data-name="A E S T H E T I C" data-yt="OGgsfnrk0Mc" data-bg="linear-gradient(135deg,#1a0030,#3a006a,#5a0080)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">A E S T H E T I C</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Mallsoft Radio" data-yt="FddlFe7-vYI" data-bg="linear-gradient(135deg,#0a0a2a,#2a0a4a,#3a0a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Mallsoft Radio</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Vapor City" data-yt="h59zvONrPtk" data-bg="linear-gradient(135deg,#200a3a,#3a1060,#501a70)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Vapor City</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Dream Protocol" data-yt="C-cnpxW5v00" data-bg="linear-gradient(135deg,#0d0028,#280050,#3a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dream Protocol</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Late Night Freq" data-yt="6VAfIFMCl6I" data-bg="linear-gradient(135deg,#18003a,#300060,#420080)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Late Night Freq</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Digital Highway" data-yt="YlH5caaGCrA" data-bg="linear-gradient(135deg,#0a0020,#20004a,#2a0055)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Digital Highway</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Neon Wave" data-yt="DrIeAXxVvj0" data-bg="linear-gradient(135deg,#150030,#2a0058,#3a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Wave</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Hologram Room" data-yt="0EqSXDwTq3s" data-bg="linear-gradient(135deg,#100028,#200048,#300060)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Hologram Room</div></div>
+          <div class="space-card" data-tag="vapor" data-name="Cyber Drift" data-yt="t8DV3PnWvf8" data-bg="linear-gradient(135deg,#08001e,#18003c,#220048)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Drift</div></div>
+        </div>
+      </div>
+      <div class="sl-section">
+        <div class="section-title">🖤 DARK TECHNO / INDUSTRIAL / EBM</div>
+        <div class="spaces-grid">
+          <div class="space-card" data-tag="techno" data-name="Dark Techno" data-yt="yKkbFDRLFts" data-bg="linear-gradient(135deg,#080808,#141414,#0a0a12)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Techno</div></div>
+          <div class="space-card" data-tag="techno" data-name="Industrial Drive" data-yt="FVRYbVfmq-Y" data-bg="linear-gradient(135deg,#0e0808,#1a0a0a,#0a0a1a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Industrial Drive</div></div>
+          <div class="space-card" data-tag="techno" data-name="Deep Pulse" data-yt="FRhCfuznYE4" data-bg="linear-gradient(135deg,#04060a,#080e18,#040810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Pulse</div></div>
+          <div class="space-card" data-tag="techno" data-name="Sector 7" data-yt="lRhW0fP38II" data-bg="linear-gradient(135deg,#050508,#0d0d14,#080810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Sector 7</div></div>
+          <div class="space-card" data-tag="techno" data-name="Overclocked" data-yt="XeI8P_TCeIk" data-bg="linear-gradient(135deg,#060810,#0e1020,#080c18)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Overclocked</div></div>
+          <div class="space-card" data-tag="techno" data-name="Thermal Core" data-yt="eoZ0YnBpEqc" data-bg="linear-gradient(135deg,#0a0406,#180810,#100408)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Thermal Core</div></div>
+          <div class="space-card" data-tag="techno" data-name="Circuit Break" data-yt="kRkOCkItW-0" data-bg="linear-gradient(135deg,#060610,#101020,#080816)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Circuit Break</div></div>
+          <div class="space-card" data-tag="techno" data-name="Binary Storm" data-yt="7WnKPrHBiTg" data-bg="linear-gradient(135deg,#030310,#0a0a1e,#060612)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Binary Storm</div></div>
+          <div class="space-card" data-tag="techno" data-name="Glitch Core" data-yt="gzfn2PqHNqk" data-bg="linear-gradient(135deg,#0a040c,#180a22,#0e0618)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Glitch Core</div></div>
+          <div class="space-card" data-tag="techno" data-name="Machine Pulse" data-yt="EXEtX8Pf_bM" data-bg="linear-gradient(135deg,#050508,#0f0f18,#080810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Machine Pulse</div></div>
+        </div>
+      </div>
+      <div class="sl-section">
+        <div class="section-title">🔴 EBM / ELECTRO INDUSTRIAL</div>
+        <div class="spaces-grid">
+          <div class="space-card" data-tag="techno" data-name="EBM Assault" data-yt="-vH9ZvAySi8" data-bg="linear-gradient(135deg,#1a0000,#2a0808,#100000)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">EBM Assault</div></div>
+          <div class="space-card" data-tag="techno" data-name="Electro Body" data-yt="i3sD9iUSiaU" data-bg="linear-gradient(135deg,#120004,#220008,#0e0002)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electro Body</div></div>
+          <div class="space-card" data-tag="techno" data-name="Industrial Force" data-yt="G-u5OhIeln4" data-bg="linear-gradient(135deg,#0a0a00,#1a1a00,#080800)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Industrial Force</div></div>
+          <div class="space-card" data-tag="techno" data-name="Dark EBM" data-yt="edqlOxtnvL0" data-bg="linear-gradient(135deg,#100010,#200020,#0c000c)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark EBM</div></div>
+          <div class="space-card" data-tag="techno" data-name="Cyber Body" data-yt="YgU261Zlkco" data-bg="linear-gradient(135deg,#0a0008,#180012,#08000a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Body</div></div>
+          <div class="space-card" data-tag="techno" data-name="Aggro Tech" data-yt="R6jcc5asp9k" data-bg="linear-gradient(135deg,#140000,#240808,#100202)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Aggro Tech</div></div>
+          <div class="space-card" data-tag="techno" data-name="Death Electric" data-yt="5zd6dwUOB7U" data-bg="linear-gradient(135deg,#050010,#0c001e,#050010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Death Electric</div></div>
+          <div class="space-card" data-tag="techno" data-name="Futurepop" data-yt="eWssZXvN7Mw" data-bg="linear-gradient(135deg,#000a14,#001428,#00080e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Futurepop</div></div>
+          <div class="space-card" data-tag="techno" data-name="Neo Industrial" data-yt="H53i70yljbw" data-bg="linear-gradient(135deg,#0a0600,#180e00,#080400)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neo Industrial</div></div>
+          <div class="space-card" data-tag="techno" data-name="Harsh Noise" data-yt="AijCmiLi544" data-bg="linear-gradient(135deg,#100008,#1e0012,#0c0006)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Harsh Noise</div></div>
+          <div class="space-card" data-tag="techno" data-name="Electro Goth" data-yt="vAhrjtc-39I" data-bg="linear-gradient(135deg,#080010,#100020,#060010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electro Goth</div></div>
+          <div class="space-card" data-tag="techno" data-name="Power Noise" data-yt="xb-uiTo7ES8" data-bg="linear-gradient(135deg,#06000a,#0e0016,#06000a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Power Noise</div></div>
+        </div>
+      </div>
+    </div><!-- /#cyberSpaces -->
+
+    <div class="section-title">🔗 URL personalizada</div>
+    <p class="yt-hint">Pega cualquier enlace de YouTube y se usará como fondo de tu espacio.</p>
+    <div class="yt-url-row">
+      <input class="yt-url-input" id="ytUrlInput" type="text" placeholder="https://youtube.com/watch?v=..." />
+      <button class="btn-yt-load" onclick="loadCustomYT()">▶ Cargar</button>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <main class="space-area">
+    <button class="sidebar-toggle-btn sl-toggle" id="toggleSL" onclick="toggleSidebar('sl')" title="Ocultar / mostrar panel">‹</button>
+    <button class="sidebar-toggle-btn sr-toggle" id="toggleSR" onclick="toggleSidebar('sr')" title="Ocultar / mostrar panel">›</button>
+    <div id="spaceBg"></div>
+    <canvas id="cyberCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:none;"></canvas>
+    <iframe id="ytFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div class="space-overlay"></div>
+    <div class="light-ray"></div>
+    <div class="particle" style="width:4px;height:4px;left:18%;animation-duration:13s;animation-delay:0s"></div>
+    <div class="particle" style="width:3px;height:3px;left:42%;animation-duration:17s;animation-delay:2.5s"></div>
+    <div class="particle" style="width:5px;height:5px;left:67%;animation-duration:11s;animation-delay:5.5s"></div>
+    <div class="particle" style="width:2px;height:2px;left:33%;animation-duration:20s;animation-delay:1s"></div>
+    <div class="particle" style="width:4px;height:4px;left:82%;animation-duration:14s;animation-delay:4s"></div>
+    <div class="space-chip" id="spaceChip">☕ Café Tranquilo</div>
+    <div class="yt-vol-ctrl" id="ytVolCtrl">
+      <button class="yt-ctrl-btn" id="ytPlayBtn" onclick="toggleYTPause()" title="Play / Pausa">⏸</button>
+      <div class="yt-seek-row">
+        <button class="yt-seek-btn" onclick="seekYT(-15)" title="Retroceder 15s">−15</button>
+        <button class="yt-seek-btn" onclick="seekYT(15)"  title="Avanzar 15s">+15</button>
+      </div>
+      <div class="yt-ctrl-divider"></div>
+      <button class="yt-vol-btn" id="ytMuteBtn" onclick="toggleYTMute()" title="Silenciar / activar">🔊</button>
+      <input class="yt-vol-slider" id="ytVolSlider" type="range" min="0" max="100" value="80" oninput="setYTVolume(this.value)">
+    </div>
+    <button class="fs-btn" id="fsBtn" onclick="toggleFullscreen()" title="Pantalla completa">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4"/>
+      </svg>
+    </button>
+  </main>
+
+  <!-- MÓDULOS FLOTANTES -->
+  <div class="module" id="mod-pomo">
+    <div class="module-header"><span>🍅 Pomodoro</span><button class="module-close" onclick="toggleModule('pomo')">×</button></div>
+    <div class="module-body">
+      <div class="tool-panel" style="border-bottom:none">
+        <div class="tool-header">
+          <span class="tool-badge" id="pomoCycles">Ciclos hoy: 0</span>
+        </div>
+        <div class="pomo-modes">
+          <button class="mode-btn active" onclick="setMode(this,25,'Enfoque')">Enfoque</button>
+          <button class="mode-btn" onclick="setMode(this,5,'Descanso')">Descanso</button>
+          <button class="mode-btn" onclick="setMode(this,15,'Pausa larga')">Pausa larga</button>
+        </div>
+        <div class="ring-wrap">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="38" fill="none" stroke="var(--border)" stroke-width="5"/>
+            <circle id="timerRing" cx="44" cy="44" r="38" fill="none" stroke="var(--accent)" stroke-width="5" stroke-dasharray="238.76" stroke-dashoffset="0" stroke-linecap="round"/>
+          </svg>
+          <div class="ring-time" id="timerDisplay">25:00</div>
+        </div>
+        <div class="ring-label" id="modeLabel">Tiempo de Enfoque</div>
+        <div class="pomo-btns">
+          <button class="btn-start" id="startBtn" onclick="toggleTimer()">▶ Iniciar</button>
+          <button class="btn-reset" onclick="resetTimer()">↺</button>
+        </div>
+        <div class="pomo-dots" id="pomoDots">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="module hidden" id="mod-tasks">
+    <div class="module-header"><span>✅ Tareas</span><button class="module-close" onclick="toggleModule('tasks')">×</button></div>
+    <div class="module-body">
+      <div class="tool-panel" style="border-bottom:none">
+        <div class="tool-header">
+          <span class="tool-title">✅ Tareas</span>
+          <span class="tool-badge" id="taskBadge">0/0</span>
+        </div>
+        <div class="task-input-row">
+          <input class="task-input" id="taskInput" type="text" placeholder="Nueva tarea…" onkeydown="if(event.key==='Enter')addTask()"/>
+          <button class="btn-add" onclick="addTask()">+</button>
+        </div>
+        <ul class="task-list" id="taskList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="module hidden" id="mod-postit">
+    <div class="module-header">
+      <span>📌 Post-its</span>
+      <button class="module-close" onclick="toggleModule('postit')">×</button>
+    </div>
+    <div class="module-body">
+      <div class="postit-pad-wrap" id="postitPad" onmousedown="startPostitDrag(event)">
+        <div class="postit-stack">
+          <div class="stack-leaf" style="background:#c7ceea;transform:rotate(4deg) translateY(2px)"></div>
+          <div class="stack-leaf" style="background:#b5ead7;transform:rotate(-3deg) translateY(1px)"></div>
+          <div class="stack-leaf" style="background:#ffd59e;transform:rotate(2deg)"></div>
+          <div class="stack-leaf stack-top" id="stackTop" style="background:#f8e45a;transform:rotate(-1deg)"></div>
+        </div>
+        <p class="postit-hint">Arrastra para soltar una nota</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="module hidden" id="mod-amb">
+    <div class="module-header"><span>🔊 Ambiente</span><button class="module-close" onclick="toggleModule('amb')">×</button></div>
+    <div class="module-body">
+      <div class="tool-panel" style="border-bottom:none">
+        <div class="sounds-grid">
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('cafe',this)">☕<span>Café</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('cafe',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('lluvia',this)">🌧️<span>Lluvia</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('lluvia',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('olas',this)">🌊<span>Olas</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('olas',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('fuego',this)">🔥<span>Fuego</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('fuego',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('selva',this)">🌿<span>Selva</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('selva',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('teclado',this)">⌨️<span>Teclado</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('teclado',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('noche',this)">🌙<span>Noche</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('noche',this.value)"></div>
+          <div class="sound-item"><button class="sound-btn" onclick="toggleAmbient('viento',this)">🌬️<span>Viento</span></button><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="setAmbientVol('viento',this.value)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="module hidden" id="mod-notes">
+    <div class="module-header"><span>📝 Notas Rápidas</span><button class="module-close" onclick="toggleModule('notes')">×</button></div>
+    <div class="module-body">
+      <div class="tool-panel" style="border-bottom:none">
+        <textarea class="notes-area" placeholder="Ideas, fórmulas, pendientes…" style="min-height:140px"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="module hidden" id="mod-spotify">
+    <div class="module-header"><span>🎵 Spotify</span><button class="module-close" onclick="toggleModule('spotify')">×</button></div>
+    <div class="module-body" style="padding:0">
+      <iframe id="spotifyFrame"
+        src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8NTLI2TtZa6?utm_source=generator&theme=0"
+        width="100%" height="352" frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy" style="display:block">
+      </iframe>
+      <div class="sp-input-row">
+        <input class="sp-input" id="spotifyUrlInput" type="text"
+               placeholder="Pega un link de Spotify…"
+               onkeydown="if(event.key==='Enter')loadSpotify()"/>
+        <button class="sp-go" onclick="loadSpotify()">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — lanzador -->
+  <aside class="sr">
+    <button class="mod-launch-btn on"  id="ml-pomo"   onclick="toggleModule('pomo')"   title="Pomodoro">🍅<span>Pomo</span></button>
+    <button class="mod-launch-btn"     id="ml-tasks"  onclick="toggleModule('tasks')"  title="Tareas">✅<span>Tareas</span></button>
+    <button class="mod-launch-btn"     id="ml-postit" onclick="toggleModule('postit')" title="Post-its">📌<span>Notas</span></button>
+    <button class="mod-launch-btn"     id="ml-amb"    onclick="toggleModule('amb')"    title="Ambiente">🔊<span>Sonidos</span></button>
+    <button class="mod-launch-btn"     id="ml-notes"  onclick="toggleModule('notes')"  title="Notas rápidas">📝<span>Memo</span></button>
+    <button class="mod-launch-btn"     id="ml-spotify" onclick="toggleModule('spotify')" title="Spotify">🎵<span>Spotify</span></button>
+  </aside>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     VISTA 2: NOVEDADES
+═══════════════════════════════════════════════ -->
+<div class="view" id="vNovedades">
+  <div style="width:100%">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+      <div class="page-header" style="margin-bottom:0">
+        <h1>📰 Novedades</h1>
+        <p>Becas, consejos de estudio y recursos para la comunidad estudiantil</p>
+      </div>
+      <button class="btn-new-post" onclick="alert('Aquí irá el editor de publicaciones')">+ Nueva publicación</button>
+    </div>
+
+    <div class="cat-bar">
+      <button class="cat-btn active" onclick="filterNews(this,'todos')">Todos</button>
+      <button class="cat-btn" onclick="filterNews(this,'beca')">🎓 Becas</button>
+      <button class="cat-btn" onclick="filterNews(this,'tip')">💡 Tips de estudio</button>
+      <button class="cat-btn" onclick="filterNews(this,'art')">📄 Artículos</button>
+      <button class="cat-btn" onclick="filterNews(this,'com')">👥 Comunidad</button>
+    </div>
+
+    <div class="news-grid" id="newsGrid">
+
+      <div class="news-card" data-cat="beca">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#c96a20,#f09050)">🎓
+          <span class="nc-tag tag-beca">Beca</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Becas PRONABEC 2025 — Convocatoria abierta</div>
+          <div class="nc-desc">El programa nacional de becas abrió postulaciones para estudios de pregrado. Cubre matrícula, mensualidad y gastos de vida.</div>
+          <div class="nc-footer">
+            <span class="nc-date">5 jun 2026</span>
+            <a class="nc-link" href="#">Ver requisitos →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="tip">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#4d7c52,#73b07a)">💡
+          <span class="nc-tag tag-tip">Tip</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Técnica Pomodoro: por qué funciona para la universidad</div>
+          <div class="nc-desc">Estudios muestran que 25 minutos de enfoque profundo + 5 de descanso mejoran la retención un 40% frente al estudio continuo.</div>
+          <div class="nc-footer">
+            <span class="nc-date">3 jun 2026</span>
+            <a class="nc-link" href="#">Leer más →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="art">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#4568dc,#b06ab3)">📄
+          <span class="nc-tag tag-art">Artículo</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Cómo organizar tu semana de exámenes sin estresarte</div>
+          <div class="nc-desc">Guía paso a paso para distribuir materias, crear bloques de repaso y mantener la calma en época de parciales.</div>
+          <div class="nc-footer">
+            <span class="nc-date">1 jun 2026</span>
+            <a class="nc-link" href="#">Leer más →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="beca">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#c0392b,#e67e22)">🌎
+          <span class="nc-tag tag-beca">Beca</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Erasmus+ para América Latina — Plazo: 30 junio</div>
+          <div class="nc-desc">Intercambio estudiantil financiado a Europa. 12 meses con beca completa. Requisito: B2 de inglés o francés.</div>
+          <div class="nc-footer">
+            <span class="nc-date">28 may 2026</span>
+            <a class="nc-link" href="#">Postular →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="tip">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#11998e,#38ef7d)">🧠
+          <span class="nc-tag tag-tip">Tip</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">El método Cornell para tomar apuntes más efectivos</div>
+          <div class="nc-desc">Divide tu hoja en tres secciones: apuntes, preguntas clave y resumen. Tu cerebro procesa la información 3x mejor.</div>
+          <div class="nc-footer">
+            <span class="nc-date">25 may 2026</span>
+            <a class="nc-link" href="#">Ver guía →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="com">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#b06ab3,#4568dc)">👥
+          <span class="nc-tag tag-com">Comunidad</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Grupos de estudio — ¡Únete al de tu ciudad!</div>
+          <div class="nc-desc">Estudiantes de Santiago, CDMX, Buenos Aires y Bogotá ya tienen grupos activos. Comparte horarios y estudia acompañado.</div>
+          <div class="nc-footer">
+            <span class="nc-date">20 may 2026</span>
+            <a class="nc-link" href="#">Unirme →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="beca">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#1a7ec0,#56c8e8)">🏛️
+          <span class="nc-tag tag-beca">Beca</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Beca de Excelencia — Universidad de Chile 2026</div>
+          <div class="nc-desc">Hasta $500.000 CLP mensuales para estudiantes con promedio ≥5.8. Postulaciones hasta el 15 de julio.</div>
+          <div class="nc-footer">
+            <span class="nc-date">18 may 2026</span>
+            <a class="nc-link" href="#">Postular →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card" data-cat="art">
+        <div class="nc-thumb" style="background:linear-gradient(135deg,#8b6e52,#4a3525)">☕
+          <span class="nc-tag tag-art">Artículo</span>
+        </div>
+        <div class="nc-body">
+          <div class="nc-title">Por qué estudiar con música lofi funciona (ciencia detrás)</div>
+          <div class="nc-desc">La música instrumental sin letra activa la red de modo por defecto del cerebro y reduce el cortisol. Te explicamos el mecanismo.</div>
+          <div class="nc-footer">
+            <span class="nc-date">15 may 2026</span>
+            <a class="nc-link" href="#">Leer más →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     VISTA 3: ASIGNATURAS
+═══════════════════════════════════════════════ -->
+<div class="view" id="vAsignaturas">
+  <div style="width:100%;overflow-y:auto;padding:28px 32px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div class="page-header" style="margin-bottom:0">
+        <h1>📚 Mis Asignaturas</h1>
+        <p>Cada asignatura tiene su propio espacio, tareas y ambiente de estudio</p>
+      </div>
+      <button class="btn-new-post" onclick="openModal()">+ Nueva asignatura</button>
+    </div>
+
+    <div class="subj-grid" id="subjGrid">
+
+      <div class="subj-card active-subj" onclick="setActiveSubject(this,'Cálculo II','#c96a20','➕')">
+        <div class="sc-header" style="background:linear-gradient(135deg,#c96a20,#f09050)">➕
+          <span class="sc-active-badge">ACTIVA</span>
+        </div>
+        <div class="sc-body">
+          <div class="sc-name">Cálculo II</div>
+          <div class="sc-teacher">👩‍🏫 Prof. García Moreno</div>
+          <div class="sc-schedule">📅 Lun / Mié / Vie — 08:30</div>
+          <div class="sc-progress"><div class="sc-progress-fill" style="background:#c96a20;width:68%"></div></div>
+          <div class="sc-prog-label">68% del semestre completado</div>
+        </div>
+      </div>
+
+      <div class="subj-card" onclick="setActiveSubject(this,'Química Orgánica','#4568dc','⚗️')">
+        <div class="sc-header" style="background:linear-gradient(135deg,#4568dc,#b06ab3)">⚗️</div>
+        <div class="sc-body">
+          <div class="sc-name">Química Orgánica</div>
+          <div class="sc-teacher">👨‍🏫 Prof. Rodríguez L.</div>
+          <div class="sc-schedule">📅 Mar / Jue — 10:00</div>
+          <div class="sc-progress"><div class="sc-progress-fill" style="background:#4568dc;width:52%"></div></div>
+          <div class="sc-prog-label">52% del semestre completado</div>
+        </div>
+      </div>
+
+      <div class="subj-card" onclick="setActiveSubject(this,'Historia Universal','#c0392b','📜')">
+        <div class="sc-header" style="background:linear-gradient(135deg,#c0392b,#e67e22)">📜</div>
+        <div class="sc-body">
+          <div class="sc-name">Historia Universal</div>
+          <div class="sc-teacher">👩‍🏫 Prof. Vásquez C.</div>
+          <div class="sc-schedule">📅 Lun / Mié — 14:00</div>
+          <div class="sc-progress"><div class="sc-progress-fill" style="background:#c0392b;width:75%"></div></div>
+          <div class="sc-prog-label">75% del semestre completado</div>
+        </div>
+      </div>
+
+      <div class="subj-card" onclick="setActiveSubject(this,'Programación Web','#11998e','💻')">
+        <div class="sc-header" style="background:linear-gradient(135deg,#11998e,#38ef7d)">💻</div>
+        <div class="sc-body">
+          <div class="sc-name">Programación Web</div>
+          <div class="sc-teacher">👨‍🏫 Prof. Núñez A.</div>
+          <div class="sc-schedule">📅 Mar / Jue / Vie — 16:00</div>
+          <div class="sc-progress"><div class="sc-progress-fill" style="background:#11998e;width:40%"></div></div>
+          <div class="sc-prog-label">40% del semestre completado</div>
+        </div>
+      </div>
+
+      <div class="subj-card" onclick="setActiveSubject(this,'Inglés Avanzado','#4d7c52','🌐')">
+        <div class="sc-header" style="background:linear-gradient(135deg,#4d7c52,#73b07a)">🌐</div>
+        <div class="sc-body">
+          <div class="sc-name">Inglés Avanzado</div>
+          <div class="sc-teacher">👩‍🏫 Prof. Smith R.</div>
+          <div class="sc-schedule">📅 Lun / Jue — 12:00</div>
+          <div class="sc-progress"><div class="sc-progress-fill" style="background:#4d7c52;width:60%"></div></div>
+          <div class="sc-prog-label">60% del semestre completado</div>
+        </div>
+      </div>
+
+      <div style="display:flex">
+        <button class="btn-add-subj" onclick="openModal()">
+          <span style="font-size:22px">＋</span> Agregar asignatura
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     VISTA 4: CALENDARIO
+═══════════════════════════════════════════════ -->
+<div class="view" id="vCalendario">
+
+  <!-- Left panel -->
+  <aside class="cal-left">
+    <!-- Mini calendar -->
+    <div class="mini-cal-header">
+      <button class="mini-nav" onclick="miniPrev()">‹</button>
+      <span id="miniMonthLabel">Junio 2026</span>
+      <button class="mini-nav" onclick="miniNext()">›</button>
+    </div>
+    <div class="mini-grid" id="miniGrid"></div>
+
+    <!-- Sync -->
+    <div class="legend-title">Sincronización</div>
+    <button class="sync-btn connected" onclick="this.classList.toggle('connected')">
+      <span>🗓️</span> Google Calendar
+      <span class="sync-status status-ok">● Conectado</span>
+    </button>
+    <button class="sync-btn" onclick="this.classList.toggle('connected');this.querySelector('.sync-status').classList.toggle('status-ok');this.querySelector('.sync-status').textContent=this.classList.contains('connected')?'● Conectado':'○ Desconectado'">
+      <span>📅</span> Outlook
+      <span class="sync-status status-off">○ Desconectado</span>
+    </button>
+
+    <!-- Legend -->
+    <div class="legend-title">Calendarios</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#4285f4"></div> Google Calendar</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#c96a20"></div> Cálculo II</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#4568dc"></div> Química Orgánica</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#c0392b"></div> Historia Universal</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#11998e"></div> Prog. Web</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#4d7c52"></div> Inglés Avanzado</div>
+    <div class="legend-item"><div class="leg-dot" style="background:#b06ab3"></div> Rincón (propio)</div>
+  </aside>
+
+  <!-- Main calendar -->
+  <div class="cal-main">
+    <div class="cal-header">
+      <h2 id="calMonthTitle">Junio 2026</h2>
+      <div class="cal-nav-group">
+        <button class="cal-nav" onclick="calPrev()">‹ Anterior</button>
+        <button class="cal-nav today" onclick="goToday()">Hoy</button>
+        <button class="cal-nav" onclick="calNext()">Siguiente ›</button>
+        <button class="btn-new-event" onclick="openEventModal()">+ Evento</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     MODAL — Nueva Asignatura
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="subjModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2>➕ Nueva asignatura</h2>
+    <div class="form-row">
+      <label>Nombre</label>
+      <input type="text" id="mName" placeholder="ej. Física II"/>
+    </div>
+    <div class="form-row">
+      <label>Docente</label>
+      <input type="text" id="mTeacher" placeholder="ej. Prof. Pérez"/>
+    </div>
+    <div class="form-row">
+      <label>Horario</label>
+      <input type="text" id="mSchedule" placeholder="ej. Lun / Mié — 10:00"/>
+    </div>
+    <div class="form-row">
+      <label>Ícono</label>
+      <div class="icon-picker" id="iconPicker">
+        <button class="ip sel" onclick="selectIcon(this)">📖</button>
+        <button class="ip" onclick="selectIcon(this)">🔬</button>
+        <button class="ip" onclick="selectIcon(this)">🧮</button>
+        <button class="ip" onclick="selectIcon(this)">🎨</button>
+        <button class="ip" onclick="selectIcon(this)">🎵</button>
+        <button class="ip" onclick="selectIcon(this)">⚽</button>
+        <button class="ip" onclick="selectIcon(this)">💻</button>
+        <button class="ip" onclick="selectIcon(this)">🌍</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Color</label>
+      <div class="color-picker" id="colorPicker">
+        <div class="cp sel" style="background:#c96a20" onclick="selectColor(this,'#c96a20')"></div>
+        <div class="cp" style="background:#4568dc" onclick="selectColor(this,'#4568dc')"></div>
+        <div class="cp" style="background:#c0392b" onclick="selectColor(this,'#c0392b')"></div>
+        <div class="cp" style="background:#11998e" onclick="selectColor(this,'#11998e')"></div>
+        <div class="cp" style="background:#4d7c52" onclick="selectColor(this,'#4d7c52')"></div>
+        <div class="cp" style="background:#b06ab3" onclick="selectColor(this,'#b06ab3')"></div>
+        <div class="cp" style="background:#2c3e50" onclick="selectColor(this,'#2c3e50')"></div>
+        <div class="cp" style="background:#e67e22" onclick="selectColor(this,'#e67e22')"></div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveSubject()">Guardar asignatura</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL — Nuevo Evento -->
+<div class="modal-overlay" id="eventModal" onclick="if(event.target===this)closeEventModal()">
+  <div class="modal event-form">
+    <h2>📅 Nuevo evento</h2>
+    <div class="form-row">
+      <label>Título</label>
+      <input type="text" id="evTitle" placeholder="ej. Parcial de Química"/>
+    </div>
+    <div class="form-row">
+      <label>Fecha</label>
+      <input type="date" id="evDate"/>
+    </div>
+    <div class="form-row">
+      <label>Hora</label>
+      <input type="time" id="evTime"/>
+    </div>
+    <div class="form-row">
+      <label>Asignatura / Calendario</label>
+      <select id="evCalendar">
+        <option value="#b06ab3">📅 Rincón de Estudio (propio)</option>
+        <option value="#c96a20">➕ Cálculo II</option>
+        <option value="#4568dc">⚗️ Química Orgánica</option>
+        <option value="#c0392b">📜 Historia Universal</option>
+        <option value="#11998e">💻 Programación Web</option>
+        <option value="#4d7c52">🌐 Inglés Avanzado</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEventModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveEvent()">Agregar evento</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ════════════════════════════════════
+   VIEW ROUTING
+════════════════════════════════════ */
+function switchView(id, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+/* ════════════════════════════════════
+   SPACES + YOUTUBE
+════════════════════════════════════ */
+let ytMuted = false;
+let ytVolume = 80;
+let ytNeedsUnmute = false;
+let ytPlaying = false;
+let _ytTime = 0;
+let _ytTicker = null;
+let ytCurrentId = null;
+let ytHealthTimer = null;
+
+// ─── Helpers de estado de stream ─────────────────────────────
+function markOffline(card) {
+  card.classList.remove('stream-online');
+  card.classList.add('stream-offline');
+}
+
+function setOnline(card) {
+  card.classList.remove('stream-offline');
+  card.classList.add('stream-online');
+  const ind = card.querySelector('.stream-indicator');
+  if (!ind) return;
+  ind.querySelector('.stream-dot').className = 'stream-dot green';
+}
+
+// ─── Probe individual ────────────────────────────────────────
+function probeStream(card) {
+  return new Promise(resolve => {
+    const id = card.dataset.yt;
+
+    // DEBE estar en el viewport para que el browser permita autoplay muted
+    const probe = document.createElement('iframe');
+    probe.style.cssText = 'position:fixed;bottom:0;right:0;width:2px;height:2px;z-index:-1;border:none;pointer-events:none;';
+    probe.allow = 'autoplay; encrypted-media';
+    probe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+
+    let settled = false;
+    const finish = live => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      window.removeEventListener('message', handler);
+      probe.remove();
+      live ? setOnline(card) : markOffline(card);
+      resolve();
+    };
+
+    const timer = setTimeout(() => finish(false), 10000);
+
+    // Inicializar canal postMessage de YouTube (requerido)
+    probe.addEventListener('load', () => {
+      try { probe.contentWindow.postMessage(JSON.stringify({event:'listening',id:1}), '*'); } catch {}
+    });
+
+    const handler = e => {
+      if (!e.data || typeof e.data !== 'string') return;
+      try {
+        const msg = JSON.parse(e.data);
+        // infoDelivery: identificar por video_id (no requiere e.source)
+        if (msg.event === 'infoDelivery') {
+          const vid = msg.info?.videoData?.video_id;
+          if (vid && vid !== id) return;
+          const st = msg.info?.playerState;
+          if (st === 1 || st === 3) finish(true);
+          return;
+        }
+        // onError / onStateChange: solo si e.source coincide
+        if (e.source !== probe.contentWindow) return;
+        if (msg.event === 'onError') { finish(false); return; }
+        if (msg.event === 'onStateChange') {
+          const s = msg.info;
+          if (s === 1 || s === 3) finish(true);
+          else if (s === 0) finish(false);
+        }
+      } catch {}
+    };
+
+    window.addEventListener('message', handler);
+    document.body.appendChild(probe);
+  });
+}
+
+// ─── Probar todos en paralelo (concurrencia 3) ───────────────
+function updateSectionVisibility() {
+  document.querySelectorAll('.sl-section').forEach(sec => {
+    const hasVisible = [...sec.querySelectorAll('.space-card[data-yt]')].some(
+      c => !c.classList.contains('stream-offline')
+    );
+    sec.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+function shuffleStream() {
+  const online = [...document.querySelectorAll('.space-card[data-yt]:not(.stream-offline)')];
+  if (!online.length) return;
+  online[Math.floor(Math.random() * online.length)].click();
+  // deactivate all filter pills so "Todos" stays visually neutral
+  document.querySelectorAll('.pills .pill').forEach(p => p.classList.remove('active'));
+}
+
+async function probeAllStreams() {
+  const cards = [...document.querySelectorAll('.space-card[data-yt]')];
+  let idx = 0;
+  const worker = async () => { while (idx < cards.length) await probeStream(cards[idx++]); };
+  await Promise.all(Array.from({length: 6}, worker));
+  updateSectionVisibility();
+  shuffleStream();
+}
+
+async function reProbeOffline() {
+  const offline = [...document.querySelectorAll('.space-card.stream-offline[data-yt]')];
+  if (!offline.length) return;
+  let idx = 0;
+  const worker = async () => { while (idx < offline.length) await probeStream(offline[idx++]); };
+  await Promise.all(Array.from({length: Math.min(4, offline.length)}, worker));
+  updateSectionVisibility();
+}
+
+// ─── Escuchar eventos del player YT vía postMessage ──────────
+window.addEventListener('message', e => {
+  if (!e.data || typeof e.data !== 'string') return;
+  try {
+    const msg = JSON.parse(e.data);
+    let state = null;
+    if (msg.event === 'onStateChange') state = msg.info;
+    else if (msg.event === 'infoDelivery' && msg.info?.playerState !== undefined) state = msg.info.playerState;
+    else if (msg.event === 'onError') {
+      clearTimeout(ytHealthTimer);
+      const c = document.querySelector('.space-card.active[data-yt]');
+      if (c) markOffline(c);
+      return;
+    }
+    if (state === 1 || state === 3) {
+      clearTimeout(ytHealthTimer);
+      const c = document.querySelector('.space-card.active[data-yt]');
+      if (c) setOnline(c);
+      if (ytNeedsUnmute) {
+        ytNeedsUnmute = false;
+        sendYTCmd('unMute');
+        sendYTCmd('setVolume', [ytVolume]);
+        setTimeout(() => { if (!ytMuted) { sendYTCmd('unMute'); sendYTCmd('setVolume', [ytVolume]); } }, 900);
+        setTimeout(() => { if (!ytMuted) { sendYTCmd('unMute'); sendYTCmd('setVolume', [ytVolume]); } }, 2500);
+      }
+    }
+    if (state !== null) {
+      if (state === 1) {
+        ytPlaying = true;
+        if (!_ytTicker) _ytTicker = setInterval(() => { _ytTime++; }, 1000);
+      } else {
+        ytPlaying = false;
+        clearInterval(_ytTicker); _ytTicker = null;
+      }
+      const pb = document.getElementById('ytPlayBtn');
+      if (pb) pb.textContent = ytPlaying ? '⏸' : '▶';
+    }
+    if (msg.event === 'infoDelivery' && msg.info?.currentTime !== undefined) {
+      _ytTime = Math.floor(msg.info.currentTime);
+    }
+  } catch {}
+});
+
+function extractYTId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function sendYTCmd(func, args = []) {
+  const frame = document.getElementById('ytFrame');
+  if (!frame?.contentWindow) return;
+  frame.contentWindow.postMessage(JSON.stringify({event:'command', func, args}), '*');
+}
+
+function buildYTSrc(videoId) {
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+}
+
+function loadYT(videoId, name) {
+  const frame = document.getElementById('ytFrame');
+  const bg    = document.getElementById('spaceBg');
+  ytCurrentId = videoId;
+  ytMuted = false;
+  ytNeedsUnmute = true;
+  const btn  = document.getElementById('ytMuteBtn');
+  const ctrl = document.getElementById('ytVolCtrl');
+  const slCollapsed = document.querySelector('.sl').classList.contains('collapsed');
+  btn.textContent = '🔊';
+  ctrl.classList.add('visible');
+  ctrl.style.left = slCollapsed ? '0px' : '320px';
+  ctrl.classList.toggle('sl-hidden', slCollapsed);
+  document.getElementById('ytVolSlider').value = ytVolume;
+  frame.classList.remove('loaded');
+  clearTimeout(ytHealthTimer);
+  ytHealthTimer = setTimeout(() => {
+    const c = document.querySelector('.space-card.active[data-yt]');
+    if (c && c.dataset.yt === videoId) markOffline(c);
+  }, 12000);
+  setTimeout(() => {
+    frame.src = buildYTSrc(videoId);
+    frame.onload = () => {
+      frame.classList.add('loaded');
+      try { frame.contentWindow.postMessage(JSON.stringify({event:'listening',id:1}), '*'); } catch {}
+    };
+    bg.style.background = '#000';
+    document.getElementById('spaceChip').textContent = '▶ ' + name;
+  }, 300);
+}
+
+function toggleYTMute() {
+  if (!ytCurrentId) return;
+  ytMuted = !ytMuted;
+  document.getElementById('ytMuteBtn').textContent = ytMuted ? '🔇' : '🔊';
+  if (ytMuted) {
+    sendYTCmd('mute');
+  } else {
+    sendYTCmd('unMute');
+    sendYTCmd('setVolume', [ytVolume]);
+  }
+}
+
+function setYTVolume(val) {
+  ytVolume = parseInt(val);
+  sendYTCmd('setVolume', [ytVolume]);
+  if (ytVolume === 0) {
+    ytMuted = true;
+    document.getElementById('ytMuteBtn').textContent = '🔇';
+  } else if (ytMuted) {
+    ytMuted = false;
+    document.getElementById('ytMuteBtn').textContent = '🔊';
+    sendYTCmd('unMute');
+  }
+}
+
+function toggleYTPause() {
+  if (ytPlaying) {
+    sendYTCmd('pauseVideo');
+  } else {
+    sendYTCmd('playVideo');
+  }
+}
+
+function seekYT(delta) {
+  sendYTCmd('getCurrentTime', []);
+  const target = Math.max(0, _ytTime + delta);
+  sendYTCmd('seekTo', [target, true]);
+  _ytTime = target;
+}
+
+function clearYT() {
+  const frame = document.getElementById('ytFrame');
+  frame.classList.remove('loaded');
+  frame.src = '';
+  ytCurrentId = null;
+  ytNeedsUnmute = false;
+  const ctrl = document.getElementById('ytVolCtrl');
+  ctrl.classList.remove('visible');
+  ctrl.classList.remove('sl-hidden');
+}
+
+function selectSpace(card) {
+  document.querySelectorAll('.space-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  const ytId = card.dataset.yt;
+  if (ytId) {
+    loadYT(ytId, card.dataset.name);
+  } else {
+    clearYT();
+    document.getElementById('spaceBg').style.background = card.dataset.bg;
+    const emoji = card.querySelector('.space-thumb').childNodes[0].textContent.trim();
+    document.getElementById('spaceChip').textContent = emoji + ' ' + card.dataset.name;
+  }
+}
+
+function loadCustomYT() {
+  const input = document.getElementById('ytUrlInput');
+  const url   = input.value.trim();
+  if (!url) return;
+  const id = extractYTId(url);
+  if (!id) { alert('No se encontró un video válido en esa URL.\nEjemplo: https://youtube.com/watch?v=jfKfPfyJRdk'); return; }
+  // deselect all cards, create a virtual "custom" card
+  document.querySelectorAll('.space-card').forEach(c => c.classList.remove('active'));
+  loadYT(id, 'Mi espacio personalizado');
+}
+
+const FS_ENTER = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4"/></svg>`;
+const FS_EXIT  = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 1v4H1M11 1v4h4M15 11h-4v4M1 11h4v4"/></svg>`;
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('fsBtn');
+  const on = !!document.fullscreenElement;
+  btn.innerHTML = on ? FS_EXIT : FS_ENTER;
+  btn.title = on ? 'Salir de pantalla completa' : 'Pantalla completa';
+});
+
+/* ════════════════════════════════════
+   MÓDULOS FLOTANTES
+════════════════════════════════════ */
+function initModuleParticles(mod) {
+  const cv = document.createElement('canvas');
+  cv.className = 'mod-particle-canvas';
+  mod.prepend(cv);
+  const cx = cv.getContext('2d');
+
+  const PAD = 20;
+  const PAL = ['80,140,255','110,80,240','60,160,240','130,100,255','50,170,220'];
+  let puffs = [], raf = null, active = false;
+
+  function resize() {
+    cv.width  = mod.offsetWidth  + PAD * 2;
+    cv.height = mod.offsetHeight + PAD * 2;
+  }
+
+  // Dibuja el rect redondeado del módulo para uso como clip
+  function clipRoundedRect(x, y, w, h, r) {
+    cx.moveTo(x + r, y);
+    cx.lineTo(x + w - r, y);
+    cx.arcTo(x + w, y,     x + w, y + r,     r);
+    cx.lineTo(x + w, y + h - r);
+    cx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    cx.lineTo(x + r, y + h);
+    cx.arcTo(x,     y + h, x,     y + h - r, r);
+    cx.lineTo(x, y + r);
+    cx.arcTo(x,     y,     x + r, y,         r);
+    cx.closePath();
+  }
+
+  function spawn() {
+    const mW = cv.width  - PAD * 2;
+    const mH = cv.height - PAD * 2;
+    const side = Math.floor(Math.random() * 4);
+    let x, y, vx, vy;
+    const spd = .18 + Math.random() * .15;
+    const drift = (Math.random() - .5) * .12;
+    if      (side === 0) { x = PAD + Math.random() * mW; y = PAD;      vx = drift; vy = -spd; }
+    else if (side === 1) { x = PAD + Math.random() * mW; y = PAD + mH; vx = drift; vy =  spd; }
+    else if (side === 2) { x = PAD;      y = PAD + Math.random() * mH; vx = -spd; vy = drift; }
+    else                 { x = PAD + mW; y = PAD + Math.random() * mH; vx =  spd; vy = drift; }
+
+    puffs.push({
+      x, y, vx, vy,
+      r: 4 + Math.random() * 4,
+      alpha: 0,
+      peak:  .55 + Math.random() * .2,
+      phase: 'in',
+      inSpd:  .045,
+      outSpd: .010,
+      rgb: PAL[Math.floor(Math.random() * PAL.length)]
+    });
+  }
+
+  function draw() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    const mW = cv.width  - PAD * 2;
+    const mH = cv.height - PAD * 2;
+
+    if (active && puffs.length < 22 && Math.random() < .25) spawn();
+
+    // Recortar: sólo pintar FUERA del módulo (anillo de 20px)
+    cx.save();
+    cx.beginPath();
+    cx.rect(0, 0, cv.width, cv.height);
+    clipRoundedRect(PAD, PAD, mW, mH, 12);
+    cx.clip('evenodd');
+
+    puffs = puffs.filter(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.r  = Math.min(p.r + .06, 10);
+
+      if (p.phase === 'in') {
+        p.alpha += p.inSpd;
+        if (p.alpha >= p.peak) { p.alpha = p.peak; p.phase = 'out'; }
+      } else {
+        p.alpha -= p.outSpd;
+        if (p.alpha <= 0) return false;
+      }
+
+      const gr = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      gr.addColorStop(0,   `rgba(${p.rgb},${p.alpha.toFixed(3)})`);
+      gr.addColorStop(.55, `rgba(${p.rgb},${(p.alpha * .3).toFixed(3)})`);
+      gr.addColorStop(1,   `rgba(${p.rgb},0)`);
+      cx.beginPath();
+      cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      cx.fillStyle = gr;
+      cx.fill();
+      return true;
+    });
+
+    cx.restore();
+
+    if (active || puffs.length > 0) raf = requestAnimationFrame(draw);
+    else raf = null;
+  }
+
+  mod.addEventListener('mouseenter', () => {
+    resize(); active = true; cv.style.opacity = '1';
+    if (!raf) draw();
+  });
+  mod.addEventListener('mouseleave', () => {
+    active = false; cv.style.opacity = '0';
+    setTimeout(() => { if (!active) { puffs = []; raf = null; } }, 2000);
+  });
+}
+
+function makeDraggable(el) {
+  const header = el.querySelector('.module-header');
+
+  // Traer al frente al hacer click en cualquier parte del módulo
+  el.addEventListener('mousedown', () => {
+    document.querySelectorAll('.module').forEach(m => m.style.zIndex = 16);
+    el.style.zIndex = 17;
+  }, true);
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.closest('.module-close')) return;
+    e.preventDefault();
+
+    const rect = el.getBoundingClientRect();
+    el.style.left  = rect.left + 'px';
+    el.style.top   = rect.top + 'px';
+    el.style.right = 'auto';
+
+    const ox = parseFloat(el.style.left), oy = parseFloat(el.style.top);
+    const sx = e.clientX, sy = e.clientY;
+
+    el.classList.add('dragging');
+
+    const onMove = e => {
+      const b = getDragBounds(el.offsetWidth, el.offsetHeight);
+      el.style.left = Math.max(b.minX, Math.min(b.maxX, ox + e.clientX - sx)) + 'px';
+      el.style.top  = Math.max(b.minY, Math.min(b.maxY, oy + e.clientY - sy)) + 'px';
+    };
+    const onUp = () => {
+      el.classList.remove('dragging');
+      // El usuario eligió una nueva posición → invalidar posiciones guardadas por push
+      Object.keys(el.dataset).filter(k => k.startsWith('pb_')).forEach(k => delete el.dataset[k]);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  });
+}
+
+// ── Límites de arrastre según banners activos ────────────────
+function getDragBounds(w, h) {
+  const cinema   = document.body.classList.contains('cinema');
+  const slActive = !cinema && !document.querySelector('.sl').classList.contains('collapsed');
+  const srActive = !cinema && !document.querySelector('.sr').classList.contains('collapsed');
+  return {
+    minX: slActive ? 320 : 0,
+    maxX: window.innerWidth  - (srActive ? 64 : 0) - w,
+    minY: cinema ? 0 : 48,
+    maxY: window.innerHeight - h
+  };
+}
+
+// ── Push / restore al abrir o cerrar banners ─────────────────
+function _allMovables() {
+  return [
+    ...document.querySelectorAll('.module:not(.hidden)'),
+    ...document.querySelectorAll('.floating-postit')
+  ];
+}
+function _ensureLeftTop(el) {
+  if (!el.style.left || el.style.left === 'auto') {
+    const r = el.getBoundingClientRect();
+    el.style.left = r.left + 'px';
+    el.style.top  = r.top  + 'px';
+    el.style.right = 'auto';
+  }
+}
+function _bounceTo(el, nx, ny) {
+  _ensureLeftTop(el);
+  el.style.transition = '';
+  void el.offsetLeft; // fuerza reflow para que la transición arranque desde la posición actual
+  el.style.transition = 'left .52s cubic-bezier(.34,1.56,.64,1), top .52s cubic-bezier(.34,1.56,.64,1)';
+  el.style.left = nx + 'px';
+  el.style.top  = ny + 'px';
+  setTimeout(() => { el.style.transition = ''; }, 600);
+}
+function pushBanner(dir) {
+  // dir: 'sl' | 'sr' | 'top'
+  const SL = 320, SR = 64, TOP = 48;
+  _allMovables().forEach(el => {
+    _ensureLeftTop(el);
+    const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let nx = x, ny = y;
+    if      (dir === 'sl'  && x < SL)                            { nx = SL  + 8; }
+    else if (dir === 'sr'  && x + w > window.innerWidth - SR)    { nx = window.innerWidth - SR - w - 8; }
+    else if (dir === 'top' && y < TOP)                           { ny = TOP + 8; }
+    else return; // no overlap — skip
+    const key = 'pb_' + dir;
+    if (!el.dataset[key]) el.dataset[key] = JSON.stringify({x, y});
+    _bounceTo(el, nx, ny);
+  });
+}
+function restoreBanner(dir) {
+  const key = 'pb_' + dir;
+  _allMovables().forEach(el => {
+    if (!el.dataset[key]) return;
+    const {x, y} = JSON.parse(el.dataset[key]);
+    delete el.dataset[key];
+    _bounceTo(el, x, y);
+  });
+}
+
+function toggleModule(key) {
+  const mod = document.getElementById('mod-' + key);
+  const btn = document.getElementById('ml-'  + key);
+  const nowHidden = mod.classList.toggle('hidden');
+  btn?.classList.toggle('on', !nowHidden);
+  if (!nowHidden) {
+    document.querySelectorAll('.module').forEach(m => m.style.zIndex = 16);
+    mod.style.zIndex = 17;
+  }
+}
+
+function toggleSidebar(side) {
+  const el  = document.querySelector('.' + side);
+  const btn = document.getElementById('toggle' + side.toUpperCase());
+  const now = el.classList.toggle('collapsed');
+  if (side === 'sl') {
+    btn.textContent = now ? '›' : '‹';
+    btn.style.left  = now ? '0px' : '320px';
+    const vc = document.getElementById('ytVolCtrl');
+    vc.style.left = now ? '0px' : '320px';
+    vc.classList.toggle('sl-hidden', now);
+  } else {
+    btn.textContent = now ? '‹' : '›';
+    btn.style.right = now ? '0px' : '64px';
+    const fb = document.getElementById('fsBtn');
+    fb.style.right = now ? '0px' : '64px';
+    fb.classList.toggle('sr-hidden', now);
+  }
+  // now=true → se ocultó (restaurar); now=false → se abrió (empujar)
+  setTimeout(() => now ? restoreBanner(side) : pushBanner(side), 30);
+}
+
+function filterSpaces(pill, tag) {
+  document.querySelectorAll('.pills .pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  const isAll = tag === 'todos';
+  document.querySelectorAll('.space-card').forEach(c => {
+    // stream-offline se oculta vía CSS; solo cambiamos el filtro en tarjetas no-offline
+    if (!c.classList.contains('stream-offline')) {
+      c.style.display = (isAll || c.dataset.tag === tag) ? '' : 'none';
+    }
+  });
+  document.querySelectorAll('.sl-section').forEach(sec => {
+    const visible = isAll
+      ? [...sec.querySelectorAll('.space-card')].some(c => !c.classList.contains('stream-offline'))
+      : [...sec.querySelectorAll('.space-card')].some(c => c.dataset.tag === tag && !c.classList.contains('stream-offline'));
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+
+/* ════════════════════════════════════
+   WEB AUDIO — CONTEXTO COMPARTIDO
+════════════════════════════════════ */
+let _actx = null;
+function getActx() {
+  if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_actx.state === 'suspended') _actx.resume();
+  return _actx;
+}
+
+function _mkBrown(ctx) {
+  const n = ctx.sampleRate * 3, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < n; i++) { const w = Math.random()*2-1; d[i]=(last+0.02*w)/1.02; last=d[i]; d[i]*=3.5; }
+  return buf;
+}
+function _mkPink(ctx) {
+  const n = ctx.sampleRate * 3, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+  let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+  for (let i=0;i<n;i++) {
+    const w=Math.random()*2-1;
+    b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759; b2=.969*b2+w*.153852;
+    b3=.8665*b3+w*.3104856; b4=.55*b4+w*.5329522; b5=-.7616*b5-w*.016898;
+    d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11; b6=w*.115926;
+  }
+  return buf;
+}
+
+const _SND = {
+  cafe(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkPink(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=700; f.Q.value=0.5;
+    s.connect(f); f.connect(out); s.start(); return ()=>s.stop();
+  },
+  lluvia(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkBrown(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=600;
+    s.connect(f); f.connect(out); s.start(); return ()=>s.stop();
+  },
+  olas(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkBrown(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=500;
+    const wg=ctx.createGain(); wg.gain.value=0.5;
+    s.connect(f); f.connect(wg); wg.connect(out); s.start();
+    let t=ctx.currentTime+0.1, tid;
+    function sched() {
+      for(let i=0;i<4;i++) {
+        wg.gain.linearRampToValueAtTime(1.0, t+3.5);
+        wg.gain.linearRampToValueAtTime(0.15, t+8);
+        wg.gain.linearRampToValueAtTime(0.5, t+9);
+        t+=9;
+      }
+      tid=setTimeout(sched, 32000);
+    }
+    sched(); return ()=>{ clearTimeout(tid); s.stop(); };
+  },
+  fuego(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkBrown(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=150; f.Q.value=0.4;
+    const cg=ctx.createGain(); cg.gain.value=1;
+    s.connect(f); f.connect(cg); cg.connect(out); s.start();
+    let tid;
+    function crk() {
+      const now=ctx.currentTime;
+      cg.gain.cancelScheduledValues(now); cg.gain.setValueAtTime(1,now);
+      cg.gain.linearRampToValueAtTime(2.2,now+0.01);
+      cg.gain.linearRampToValueAtTime(0.8,now+0.06);
+      cg.gain.linearRampToValueAtTime(1,now+0.25);
+      tid=setTimeout(crk, 120+Math.random()*700);
+    }
+    tid=setTimeout(crk, Math.random()*400);
+    return ()=>{ clearTimeout(tid); s.stop(); };
+  },
+  selva(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkPink(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=1800;
+    s.connect(f); f.connect(out); s.start(); return ()=>s.stop();
+  },
+  teclado(ctx, out) {
+    let stopped=false;
+    function click() {
+      if(stopped) return;
+      const now=ctx.currentTime, osc=ctx.createOscillator(), g=ctx.createGain();
+      osc.type='square'; osc.frequency.value=150+Math.random()*200;
+      osc.connect(g); g.connect(out);
+      g.gain.setValueAtTime(0.07,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.05);
+      osc.start(now); osc.stop(now+0.06);
+      if(Math.random()<0.25) setTimeout(click, 30+Math.random()*50);
+      setTimeout(click, 180+Math.random()*500);
+    }
+    click(); return ()=>{ stopped=true; };
+  },
+  noche(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkPink(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=3500; f.Q.value=2;
+    const wg=ctx.createGain(); wg.gain.value=0.5;
+    const lfo=ctx.createOscillator(); const lg=ctx.createGain();
+    lfo.frequency.value=14; lg.gain.value=0.45;
+    s.connect(f); f.connect(wg); wg.connect(out);
+    lfo.connect(lg); lg.connect(wg.gain);
+    s.start(); lfo.start();
+    return ()=>{ s.stop(); lfo.stop(); };
+  },
+  viento(ctx, out) {
+    const s=ctx.createBufferSource(); s.buffer=_mkPink(ctx); s.loop=true;
+    const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=350; f.Q.value=0.4;
+    const wg=ctx.createGain(); wg.gain.value=0.5;
+    s.connect(f); f.connect(wg); wg.connect(out); s.start();
+    let t=ctx.currentTime+0.1, tid;
+    function sched() {
+      for(let i=0;i<3;i++) {
+        wg.gain.linearRampToValueAtTime(1.0, t+3);
+        wg.gain.linearRampToValueAtTime(0.2, t+8);
+        wg.gain.linearRampToValueAtTime(0.5, t+12);
+        t+=12;
+      }
+      tid=setTimeout(sched, 32000);
+    }
+    sched(); return ()=>{ clearTimeout(tid); s.stop(); };
+  }
+};
+
+const _ambActive = {};
+
+function toggleAmbient(key, btn) {
+  btn.classList.toggle('on');
+  const on = btn.classList.contains('on');
+  const slider = btn.parentElement.querySelector('.sound-vol');
+  if (on) {
+    const ctx = getActx();
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = (slider ? parseInt(slider.value) : 50) / 100 * 0.7;
+    gainNode.connect(ctx.destination);
+    const stop = _SND[key](ctx, gainNode);
+    _ambActive[key] = { gainNode, stop };
+  } else if (_ambActive[key]) {
+    const { gainNode, stop } = _ambActive[key];
+    gainNode.gain.setTargetAtTime(0, getActx().currentTime, 0.3);
+    setTimeout(() => { try{stop();}catch{} try{gainNode.disconnect();}catch{} }, 800);
+    delete _ambActive[key];
+  }
+}
+
+function setAmbientVol(key, val) {
+  if (_ambActive[key]) {
+    _ambActive[key].gainNode.gain.setTargetAtTime(parseInt(val)/100*0.7, getActx().currentTime, 0.05);
+  }
+}
+
+// Timbre de marimba/madera: ataque rápido, armónico inarmónico, decay natural
+function _woodNote(ctx, freq, t, dur, vol=0.18) {
+  const o1=ctx.createOscillator(), o2=ctx.createOscillator();
+  const g=ctx.createGain(), g2=ctx.createGain();
+  o1.type='triangle'; o2.type='triangle';
+  // Caída de pitch inicial característica de la marimba
+  o1.frequency.setValueAtTime(freq*1.012, t);
+  o1.frequency.linearRampToValueAtTime(freq, t+0.02);
+  // Parcial inarmónico de marimba (~4.07×)
+  o2.frequency.value = freq * 4.07;
+  g2.gain.value = 0.1;
+  o1.connect(g); o2.connect(g2); g2.connect(g);
+  // Añadir ligero cuerpo resonante (filtro LP)
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
+  g.connect(lp); lp.connect(ctx.destination);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol, t+0.005); // ataque impulsivo
+  g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+  o1.start(t); o1.stop(t+dur+.05);
+  o2.start(t); o2.stop(t+dur+.05);
+}
+
+function playCountdownBeep(n) {
+  // Golpe suave de madera: pitch bajo, muy corto
+  const ctx=getActx(), t=ctx.currentTime;
+  const freq = n===3 ? 260 : n===2 ? 300 : 360;
+  _woodNote(ctx, freq, t, 0.22, 0.16);
+}
+
+function playStartSound() {
+  // Escala pentatónica ascendente, suave como llamada a concentrarse
+  const ctx=getActx(), now=ctx.currentTime;
+  [[392,0],[494,.12],[587,.24],[659,.36],[784,.5]].forEach(([f,dt]) =>
+    _woodNote(ctx, f, now+dt, 0.55, 0.15)
+  );
+}
+
+function playPomoAlert(isWorkEnd) {
+  const ctx=getActx(), now=ctx.currentTime;
+  if (isWorkEnd) {
+    // Trabajo completado: frase tranquila Do-Mi-Sol-Mi-Do
+    [[523,0],[659,.16],[784,.32],[659,.52],[523,.72]].forEach(([f,dt]) =>
+      _woodNote(ctx, f, now+dt, 1.1, 0.16)
+    );
+  } else {
+    // Descanso terminado: 3 golpes gentiles que invitan a reanudar
+    [[440,0],[440,.22],[523,.44]].forEach(([f,dt]) =>
+      _woodNote(ctx, f, now+dt, 0.7, 0.14)
+    );
+  }
+}
+
+/* ════════════════════════════════════
+   POMODORO
+════════════════════════════════════ */
+let timeLeft = 25*60, totalTime = 25*60, running = false, timerInterval = null;
+let pomoCycleCount = 0, pomoRoundStep = 0;
+let _cdActive = false, _cdTimer = null;
+const CIRC = 238.76;
+
+function updateTimer() {
+  const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
+  const s = String(timeLeft%60).padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  document.getElementById('timerRing').style.strokeDashoffset = CIRC*(1-timeLeft/totalTime);
+}
+
+function _autoNext(btn, min, label) {
+  setMode(btn, min, label);
+  setTimeout(_startCountdown, 1400); // pausa breve entre etapas
+}
+
+function _pomoTick() {
+  if (timeLeft > 0) { timeLeft--; updateTimer(); return; }
+  clearInterval(timerInterval); running = false;
+  document.getElementById('startBtn').textContent = '▶ Iniciar';
+  const isWork = document.querySelector('.mode-btn.active').textContent.trim() === 'Enfoque';
+  if (isWork) {
+    pomoRoundStep = Math.min(pomoRoundStep + 1, 4);
+    pomoCycleCount++;
+    document.getElementById('pomoCycles').textContent = `Ciclos hoy: ${pomoCycleCount}`;
+    const dots = document.querySelectorAll('#pomoDots .dot');
+    dots.forEach((d, i) => d.classList.toggle('done', i < pomoRoundStep));
+    playPomoAlert(true);
+    if (pomoRoundStep >= 4) {
+      pomoRoundStep = 0;
+      setTimeout(() => dots.forEach(d => d.classList.remove('done')), 900);
+      _autoNext(document.querySelectorAll('.mode-btn')[2], 15, 'Pausa larga');
+    } else {
+      _autoNext(document.querySelectorAll('.mode-btn')[1], 5, 'Descanso');
+    }
+  } else {
+    playPomoAlert(false);
+    _autoNext(document.querySelectorAll('.mode-btn')[0], 25, 'Enfoque');
+  }
+}
+
+function _beginTimer() {
+  running = true;
+  document.getElementById('startBtn').textContent = '⏸ Pausar';
+  timerInterval = setInterval(_pomoTick, 1000);
+}
+
+function _startCountdown() {
+  _cdActive = true;
+  document.getElementById('startBtn').textContent = '× Cancelar';
+  const display = document.getElementById('timerDisplay');
+  const ring    = document.getElementById('timerRing');
+  let n = 3;
+  display.textContent = n;
+  ring.style.strokeDashoffset = CIRC; // ring vacío durante cuenta regresiva
+  playCountdownBeep(n);
+
+  const tick = () => {
+    n--;
+    if (n > 0) {
+      display.textContent = n;
+      playCountdownBeep(n);
+      _cdTimer = setTimeout(tick, 1000);
+    } else {
+      _cdActive = false;
+      playStartSound();
+      updateTimer();
+      _beginTimer();
+    }
+  };
+  _cdTimer = setTimeout(tick, 1000);
+}
+
+function toggleTimer() {
+  const btn = document.getElementById('startBtn');
+  if (_cdActive) {
+    clearTimeout(_cdTimer); _cdActive = false;
+    btn.textContent = '▶ Iniciar'; updateTimer(); return;
+  }
+  if (running) {
+    clearInterval(timerInterval); running = false;
+    btn.textContent = '▶ Continuar';
+  } else {
+    // Inicio fresco: countdown; reanudación: directo
+    if (timeLeft === totalTime) _startCountdown();
+    else _beginTimer();
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval); clearTimeout(_cdTimer);
+  running = false; _cdActive = false; timeLeft = totalTime;
+  document.getElementById('startBtn').textContent = '▶ Iniciar'; updateTimer();
+}
+
+function setMode(btn, min, label) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); totalTime = min*60; timeLeft = totalTime;
+  clearInterval(timerInterval); clearTimeout(_cdTimer);
+  running = false; _cdActive = false;
+  document.getElementById('startBtn').textContent = '▶ Iniciar';
+  document.getElementById('modeLabel').textContent = 'Tiempo de '+label;
+  updateTimer();
+}
+
+/* ════════════════════════════════════
+   TASKS + SUBTASKS
+════════════════════════════════════ */
+let taskCounter = 100;
+const TASK_KEY = 'rincon_tasks';
+
+function _esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function countTasks() {
+  const total = document.querySelectorAll('.task-item').length;
+  const done  = document.querySelectorAll('.task-row .t-check.done').length;
+  document.getElementById('taskBadge').textContent = `${done}/${total}`;
+}
+// ── Post-it flotante ─────────────────────────────────────────
+const POSTIT_COLORS = ['#f8e45a','#ffb3c1','#b5ead7','#c7ceea','#ffd59e','#e2b4f0'];
+const POSTIT_ROTS   = [-2.2, 1.4, -1.0, 2.4, 0.6, -1.6, 1.8];
+let _piColorIdx = 0, _piRotIdx = 0, _piZ = 20;
+
+function _nextPostitColor() { return POSTIT_COLORS[_piColorIdx++ % POSTIT_COLORS.length]; }
+function _nextPostitRot()   { return POSTIT_ROTS[_piRotIdx++   % POSTIT_ROTS.length]; }
+
+function _animatePadLeaf() {
+  const top = document.getElementById('stackTop');
+  if (!top) return;
+  top.style.transition = 'transform .22s ease, opacity .22s ease';
+  top.style.transform  = 'rotate(-10deg) translateY(-16px) scale(.9)';
+  top.style.opacity    = '0';
+  setTimeout(() => {
+    top.style.transition = '';
+    top.style.transform  = 'rotate(-1deg)';
+    top.style.opacity    = '1';
+    top.style.background = POSTIT_COLORS[_piColorIdx % POSTIT_COLORS.length];
+  }, 250);
+}
+
+function _createFPNote(text, color, rot, x, y) {
+  const note = document.createElement('div');
+  note.className = 'floating-postit';
+  note.style.cssText = `background:${color};left:${x}px;top:${y}px;
+    --rot:${rot}deg;transform:rotate(${rot}deg);z-index:${++_piZ};`;
+
+  const ta = document.createElement('textarea');
+  ta.placeholder = 'Escribe aquí…';
+  ta.value = text || '';
+  ta.rows = 4;
+  const autoResize = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+  ta.addEventListener('input', () => { autoResize(); saveFloatingPostits(); });
+  ta.addEventListener('mousedown', e => e.stopPropagation()); // no arrastrar al escribir
+  requestAnimationFrame(autoResize); // ajustar al cargar si ya tiene texto
+
+  const del = document.createElement('button');
+  del.className = 'fp-del';
+  del.textContent = '×';
+  del.addEventListener('mousedown', e => e.stopPropagation());
+  del.onclick = () => {
+    note.style.transition = 'opacity .18s ease, transform .18s ease';
+    note.style.opacity = '0';
+    note.style.transform = `rotate(${rot - 6}deg) scale(.85)`;
+    setTimeout(() => { note.remove(); saveFloatingPostits(); }, 190);
+  };
+
+  note.appendChild(ta);
+  note.appendChild(del);
+
+  // Drag
+  note.addEventListener('mousedown', e => {
+    if (e.target === ta || e.target === del) return;
+    e.preventDefault();
+    _piZ++;
+    note.style.zIndex = _piZ;
+    note.classList.add('fp-dragging');
+    const ox = parseFloat(note.style.left), oy = parseFloat(note.style.top);
+    const sx = e.clientX, sy = e.clientY;
+    const onMove = e => {
+      const b = getDragBounds(note.offsetWidth, note.offsetHeight);
+      note.style.left = Math.max(b.minX, Math.min(b.maxX, ox + e.clientX - sx)) + 'px';
+      note.style.top  = Math.max(b.minY, Math.min(b.maxY, oy + e.clientY - sy)) + 'px';
+    };
+    const onUp = () => {
+      note.classList.remove('fp-dragging');
+      Object.keys(note.dataset).filter(k => k.startsWith('pb_')).forEach(k => delete note.dataset[k]);
+      saveFloatingPostits();
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  });
+
+  return note;
+}
+
+function startPostitDrag(e) {
+  e.preventDefault();
+  const color = _nextPostitColor();
+  const rot   = _nextPostitRot();
+  _animatePadLeaf();
+
+  const cx = e.clientX - 84, cy = e.clientY - 14;
+  const note = _createFPNote('', color, rot, cx, cy);
+  note.style.opacity = '.82';
+  note.style.animation = 'none';
+  document.getElementById('vFocus').appendChild(note);
+
+  const onMove = e => {
+    const b = getDragBounds(note.offsetWidth, note.offsetHeight);
+    note.style.left = Math.max(b.minX, Math.min(b.maxX, e.clientX - 84)) + 'px';
+    note.style.top  = Math.max(b.minY, Math.min(b.maxY, e.clientY - 14)) + 'px';
+  };
+  const onUp = () => {
+    note.style.opacity = '1';
+    note.style.animation = 'fp-drop .32s cubic-bezier(.34,1.56,.64,1) forwards';
+    note.querySelector('textarea').focus();
+    saveFloatingPostits();
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   onUp);
+  };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   onUp);
+}
+
+function saveFloatingPostits() {
+  const data = [...document.querySelectorAll('.floating-postit')].map(n => ({
+    text:  n.querySelector('textarea').value,
+    color: n.style.background,
+    rot:   parseFloat(getComputedStyle(n).getPropertyValue('--rot')) || 0,
+    x:     parseFloat(n.style.left),
+    y:     parseFloat(n.style.top)
+  }));
+  localStorage.setItem('rincon_fpostits', JSON.stringify(data));
+}
+
+function loadPostits() {
+  try {
+    const data = JSON.parse(localStorage.getItem('rincon_fpostits') || '[]');
+    const container = document.getElementById('vFocus');
+    data.forEach(d => {
+      const note = _createFPNote(d.text, d.color, d.rot, d.x, d.y);
+      container.appendChild(note);
+    });
+  } catch(e) {}
+}
+
+function loadSpotify() {
+  const raw = document.getElementById('spotifyUrlInput').value.trim();
+  if (!raw) return;
+  const m = raw.match(/spotify\.com\/(playlist|album|track|artist|episode|show)\/([A-Za-z0-9]+)/);
+  if (!m) return;
+  document.getElementById('spotifyFrame').src =
+    `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`;
+  document.getElementById('spotifyUrlInput').value = '';
+}
+
+function saveTasks() {
+  const tasks = [...document.querySelectorAll('.task-item')].map(li => ({
+    id: li.id,
+    text: li.querySelector('.t-text').textContent,
+    done: li.querySelector('.t-check').classList.contains('done'),
+    subtasks: [...li.querySelectorAll('.subtask-row')].map(r => ({
+      text: r.querySelector('.st-text').textContent,
+      done: r.querySelector('.st-check').classList.contains('done')
+    }))
+  }));
+  localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+}
+function loadTasks() {
+  const saved = localStorage.getItem(TASK_KEY);
+  if (!saved) return;
+  try {
+    JSON.parse(saved).forEach(t => _insertTask(t.id, t.text, t.done, t.subtasks));
+    countTasks();
+  } catch {}
+}
+function _insertTask(id, text, done, subtasks) {
+  const li = document.createElement('li');
+  li.className = 'task-item'; li.id = id;
+  const stRows = (subtasks||[]).map(s =>
+    `<div class="subtask-row"><div class="st-check${s.done?' done':''}" onclick="toggleSub(this)">${s.done?'✓':''}</div><span class="st-text${s.done?' done':''}">${_esc(s.text)}</span></div>`
+  ).join('');
+  const n = (subtasks||[]).length;
+  li.innerHTML = `
+    <div class="task-row">
+      <div class="t-check${done?' done':''}" onclick="toggleTask(this)">${done?'✓':''}</div>
+      <span class="t-text${done?' done':''}">${_esc(text)}</span>
+      <button class="expand-btn" onclick="toggleSubtasks('${id}')">▸ ${n}</button>
+      <button class="t-del" onclick="deleteTask('${id}')" title="Eliminar">×</button>
+    </div>
+    <div class="subtask-area" id="st-${id}">${stRows}
+      <button class="add-subtask" onclick="addSubtask('${id}')">+ subtarea</button>
+    </div>`;
+  document.getElementById('taskList').appendChild(li);
+}
+function deleteTask(id) {
+  document.getElementById(id)?.remove();
+  countTasks(); saveTasks();
+}
+function toggleTask(check) {
+  check.classList.toggle('done');
+  check.nextElementSibling.classList.toggle('done');
+  check.textContent = check.classList.contains('done') ? '✓' : '';
+  countTasks(); saveTasks();
+}
+function toggleSubtasks(id) {
+  const area = document.getElementById('st-'+id);
+  area.classList.toggle('open');
+  const btn = document.querySelector(`#${id} .expand-btn`);
+  btn.textContent = area.classList.contains('open')
+    ? btn.textContent.replace('▸','▾')
+    : btn.textContent.replace('▾','▸');
+}
+function toggleSub(check) {
+  check.classList.toggle('done');
+  check.nextElementSibling.classList.toggle('done');
+  check.textContent = check.classList.contains('done') ? '✓' : '';
+  saveTasks();
+}
+function addSubtask(taskId) {
+  const text = prompt('Nueva subtarea:');
+  if (!text?.trim()) return;
+  const area = document.getElementById('st-'+taskId);
+  const row = document.createElement('div'); row.className = 'subtask-row';
+  row.innerHTML = `<div class="st-check" onclick="toggleSub(this)"></div><span class="st-text">${_esc(text.trim())}</span>`;
+  area.insertBefore(row, area.querySelector('.add-subtask'));
+  area.classList.add('open');
+  const btn = document.querySelector(`#${taskId} .expand-btn`);
+  const n = area.querySelectorAll('.subtask-row').length;
+  btn.textContent = `▾ ${n}`;
+  saveTasks();
+}
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const val = input.value.trim(); if (!val) return;
+  taskCounter++;
+  const id = 't'+taskCounter;
+  _insertTask(id, val, false, []);
+  input.value = ''; countTasks(); saveTasks();
+}
+
+/* ════════════════════════════════════
+   NOVEDADES FILTER
+════════════════════════════════════ */
+function filterNews(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.news-card').forEach(c => {
+    c.style.display = (cat === 'todos' || c.dataset.cat === cat) ? '' : 'none';
+  });
+}
+
+/* ════════════════════════════════════
+   ASIGNATURAS
+════════════════════════════════════ */
+let selColor = '#c96a20', selIcon = '📖';
+function setActiveSubject(card, name, color, icon) {
+  document.querySelectorAll('.subj-card').forEach(c => {
+    c.classList.remove('active-subj');
+    const badge = c.querySelector('.sc-active-badge');
+    if (badge) badge.remove();
+  });
+  card.classList.add('active-subj');
+  const badge = document.createElement('span');
+  badge.className = 'sc-active-badge'; badge.textContent = 'ACTIVA';
+  card.querySelector('.sc-header').appendChild(badge);
+  // update focus view
+  document.getElementById('focusSubjName').textContent = name;
+  document.getElementById('focusSubjDot').style.background = color;
+  document.getElementById('subjTaskLabel').textContent = name;
+  document.getElementById('subjTaskLabel').style.color = color;
+  document.documentElement.style.setProperty('--accent', color);
+}
+function openModal() { document.getElementById('subjModal').classList.add('open'); }
+function closeModal(){ document.getElementById('subjModal').classList.remove('open'); }
+function selectColor(el, color) {
+  document.querySelectorAll('.cp').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel'); selColor = color;
+}
+function selectIcon(el) {
+  document.querySelectorAll('.ip').forEach(i => i.classList.remove('sel'));
+  el.classList.add('sel'); selIcon = el.textContent;
+}
+function saveSubject() {
+  const name = document.getElementById('mName').value.trim();
+  if (!name) { alert('Escribe el nombre de la asignatura'); return; }
+  const teacher  = document.getElementById('mTeacher').value.trim() || 'Docente';
+  const schedule = document.getElementById('mSchedule').value.trim() || 'Por definir';
+  const grid = document.getElementById('subjGrid');
+  const addBtn = grid.querySelector('[style*="display:flex"]');
+  const card = document.createElement('div');
+  card.className = 'subj-card';
+  card.setAttribute('onclick', `setActiveSubject(this,'${name}','${selColor}','${selIcon}')`);
+  card.innerHTML = `
+    <div class="sc-header" style="background:linear-gradient(135deg,${selColor},${selColor}aa)">${selIcon}</div>
+    <div class="sc-body">
+      <div class="sc-name">${name}</div>
+      <div class="sc-teacher">👩‍🏫 ${teacher}</div>
+      <div class="sc-schedule">📅 ${schedule}</div>
+      <div class="sc-progress"><div class="sc-progress-fill" style="background:${selColor};width:0%"></div></div>
+      <div class="sc-prog-label">0% del semestre completado</div>
+    </div>`;
+  grid.insertBefore(card, addBtn);
+  // add to event calendar select
+  const sel = document.getElementById('evCalendar');
+  const opt = document.createElement('option');
+  opt.value = selColor; opt.textContent = `${selIcon} ${name}`;
+  sel.appendChild(opt);
+  closeModal();
+  document.getElementById('mName').value='';
+  document.getElementById('mTeacher').value='';
+  document.getElementById('mSchedule').value='';
+}
+
+/* ════════════════════════════════════
+   CALENDAR
+════════════════════════════════════ */
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+let calYear = 2026, calMonth = 5; // June 2026
+
+const CAL_EVENTS = [
+  {date:'2026-06-08',title:'Clase Cálculo II',color:'#c96a20'},
+  {date:'2026-06-08',title:'Reunión de estudio',color:'#b06ab3'},
+  {date:'2026-06-10',title:'Parcial Química',color:'#4568dc'},
+  {date:'2026-06-11',title:'Entrega Historia',color:'#c0392b'},
+  {date:'2026-06-12',title:'Lab. Química',color:'#4568dc'},
+  {date:'2026-06-13',title:'Google: cumpleaños',color:'#4285f4'},
+  {date:'2026-06-15',title:'Clase Prog. Web',color:'#11998e'},
+  {date:'2026-06-17',title:'Sesión Rincón',color:'#b06ab3'},
+  {date:'2026-06-18',title:'Examen Inglés',color:'#4d7c52'},
+  {date:'2026-06-20',title:'Google: evento fam.',color:'#4285f4'},
+  {date:'2026-06-22',title:'Cálculo — ejercicios',color:'#c96a20'},
+  {date:'2026-06-25',title:'Parcial Historia',color:'#c0392b'},
+  {date:'2026-06-28',title:'Proyecto Web',color:'#11998e'},
+  {date:'2026-06-30',title:'Fin de semestre',color:'#b06ab3'},
+];
+let customEvents = [];
+
+function renderCal() {
+  const title = `${MONTHS[calMonth]} ${calYear}`;
+  document.getElementById('calMonthTitle').textContent = title;
+  document.getElementById('miniMonthLabel').textContent = title;
+
+  const allEvents = [...CAL_EVENTS, ...customEvents];
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+
+  // Main grid
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = DAYS.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) {
+    const prev = new Date(calYear, calMonth, -firstDay+i+1);
+    grid.innerHTML += `<div class="cal-cell other-month"><div class="cell-num">${prev.getDate()}</div></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
+    const dayEvents = allEvents.filter(e => e.date === dateStr);
+    let evHtml = dayEvents.slice(0,3).map(e =>
+      `<div class="cal-event" style="background:${e.color}22;color:${e.color};border-left:3px solid ${e.color}">${e.title}</div>`
+    ).join('');
+    if (dayEvents.length > 3) evHtml += `<div style="font-size:10px;color:var(--muted)">+${dayEvents.length-3} más</div>`;
+    grid.innerHTML += `<div class="cal-cell${isToday?' today':''}"><div class="cell-num">${d}</div>${evHtml}</div>`;
+  }
+
+  // Mini grid
+  const mini = document.getElementById('miniGrid');
+  mini.innerHTML = ['D','L','M','X','J','V','S'].map(d => `<div class="mini-day-label">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) {
+    const prev = new Date(calYear, calMonth, -firstDay+i+1);
+    mini.innerHTML += `<div class="mini-day other-month">${prev.getDate()}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
+    const hasEv = allEvents.some(e => e.date === dateStr);
+    mini.innerHTML += `<div class="mini-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="highlightDay(${d})">${d}</div>`;
+  }
+}
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
+function miniPrev() { calPrev(); }
+function miniNext() { calNext(); }
+function goToday() {
+  const t = new Date(); calYear = t.getFullYear(); calMonth = t.getMonth();
+  renderCal();
+}
+function highlightDay(d) {
+  document.querySelectorAll('.cal-cell').forEach((c,i) => {
+    if (i >= 7) c.style.outline = '';
+  });
+}
+
+function openEventModal() {
+  const today = new Date();
+  document.getElementById('evDate').value = today.toISOString().split('T')[0];
+  document.getElementById('evTime').value = '09:00';
+  document.getElementById('eventModal').classList.add('open');
+}
+function closeEventModal() { document.getElementById('eventModal').classList.remove('open'); }
+function saveEvent() {
+  const title = document.getElementById('evTitle').value.trim();
+  if (!title) { alert('Escribe el título del evento'); return; }
+  const date  = document.getElementById('evDate').value;
+  const color = document.getElementById('evCalendar').value;
+  customEvents.push({date, title, color});
+  closeEventModal();
+  renderCal();
+  document.getElementById('evTitle').value = '';
+}
+
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+updateTimer();
+countTasks();
+renderCal();
+
+/* ── Animación de energía cyber ── */
+let _cyberAnimFrame = null;
+
+function _startCyberAnim() {
+  const canvas = document.getElementById('cyberCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  const resize = () => {
+    W = canvas.width  = canvas.offsetWidth  || window.innerWidth;
+    H = canvas.height = canvas.offsetHeight || window.innerHeight;
+  };
+  resize();
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
+
+  // Nodos de la red de energía
+  const N = 55;
+  const nodes = Array.from({length: N}, () => ({
+    x: Math.random() * (window.innerWidth || 1440),
+    y: Math.random() * (window.innerHeight || 900),
+    vx: (Math.random() - .5) * .55,
+    vy: (Math.random() - .5) * .55,
+    r:  Math.random() * 1.8 + .5,
+    pulse: Math.random() * Math.PI * 2,
+    cyan: Math.random() > .38
+  }));
+
+  // Pulsos viajando por las conexiones
+  const pulses = Array.from({length: 18}, () => ({
+    from: Math.floor(Math.random() * N),
+    to:   Math.floor(Math.random() * N),
+    t: Math.random(),
+    speed: .004 + Math.random() * .007,
+    cyan: Math.random() > .4
+  }));
+
+  // Rayos horizontales que cruzan la pantalla
+  const beams = Array.from({length: 6}, (_, i) => ({
+    y: (i / 5) * .9 * (window.innerHeight || 900),
+    x: -200,
+    speed: 1.2 + Math.random() * 2.5,
+    width: 80 + Math.random() * 200,
+    alpha: .08 + Math.random() * .14,
+    cyan: Math.random() > .4,
+    active: false,
+    timer: Math.random() * 300
+  }));
+
+  const draw = () => {
+    if (!document.body.classList.contains('cyber')) {
+      _cyberAnimFrame = null;
+      ro.disconnect();
+      return;
+    }
+    _cyberAnimFrame = requestAnimationFrame(draw);
+
+    ctx.clearRect(0, 0, W, H);
+
+    const t = Date.now() * .001;
+
+    // ── Horizontal energy beams ──
+    beams.forEach(b => {
+      b.timer--;
+      if (!b.active && b.timer <= 0) {
+        b.active = true;
+        b.x = -b.width;
+        b.y = Math.random() * H * .95;
+        b.speed = 1.5 + Math.random() * 3;
+        b.width = 80 + Math.random() * 250;
+        b.alpha = .1 + Math.random() * .18;
+        b.cyan  = Math.random() > .38;
+      }
+      if (b.active) {
+        b.x += b.speed;
+        const col = b.cyan ? '0,229,255' : '255,46,248';
+        const grd = ctx.createLinearGradient(b.x, 0, b.x + b.width, 0);
+        grd.addColorStop(0,   `rgba(${col},0)`);
+        grd.addColorStop(.35, `rgba(${col},${b.alpha})`);
+        grd.addColorStop(.65, `rgba(${col},${b.alpha})`);
+        grd.addColorStop(1,   `rgba(${col},0)`);
+        ctx.fillStyle = grd;
+        ctx.fillRect(b.x, b.y - 1, b.width, 2);
+        // reflejo
+        ctx.globalAlpha = .3;
+        ctx.fillRect(b.x, b.y - 4, b.width, 1);
+        ctx.globalAlpha = 1;
+        if (b.x > W + b.width) { b.active = false; b.timer = 60 + Math.random() * 200; }
+      }
+    });
+
+    // ── Red de nodos ──
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      n.pulse += .025;
+      if (n.x < 0) n.x = W; if (n.x > W) n.x = 0;
+      if (n.y < 0) n.y = H; if (n.y > H) n.y = 0;
+    });
+
+    // Conexiones entre nodos cercanos
+    const DIST = 130;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < DIST) {
+          const a = (1 - d/DIST) * .12;
+          ctx.strokeStyle = `rgba(0,200,255,${a})`;
+          ctx.lineWidth = .5;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Pulsos viajando entre nodos
+    pulses.forEach(p => {
+      p.t += p.speed;
+      if (p.t >= 1) {
+        p.t = 0;
+        p.from = Math.floor(Math.random() * N);
+        p.to   = Math.floor(Math.random() * N);
+        p.cyan = Math.random() > .4;
+      }
+      const nf = nodes[p.from], nt = nodes[p.to];
+      const px = nf.x + (nt.x - nf.x) * p.t;
+      const py = nf.y + (nt.y - nf.y) * p.t;
+      const col = p.cyan ? '0,229,255' : '255,46,248';
+      ctx.beginPath();
+      ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${col},.85)`;
+      ctx.fill();
+      // trail
+      const px2 = nf.x + (nt.x - nf.x) * Math.max(0, p.t - .08);
+      const py2 = nf.y + (nt.y - nf.y) * Math.max(0, p.t - .08);
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(${col},.3)`;
+      ctx.lineWidth = 1.2;
+      ctx.moveTo(px2, py2); ctx.lineTo(px, py);
+      ctx.stroke();
+    });
+
+    // Nodos pulsantes
+    nodes.forEach(n => {
+      const glow = .5 + .5 * Math.sin(n.pulse);
+      const col = n.cyan ? '0,229,255' : '200,100,255';
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * (1 + .3 * glow), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${col},${.4 + .3 * glow})`;
+      ctx.fill();
+    });
+  };
+
+  if (_cyberAnimFrame) cancelAnimationFrame(_cyberAnimFrame);
+  draw();
+}
+
+function _stopCyberAnim() {
+  if (_cyberAnimFrame) { cancelAnimationFrame(_cyberAnimFrame); _cyberAnimFrame = null; }
+  const canvas = document.getElementById('cyberCanvas');
+  if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+}
+
+/* ── Modo Cyber ── */
+function toggleCyberMode() {
+  const isCyber = document.body.classList.toggle('cyber');
+  localStorage.setItem('rincon_mode', isCyber ? 'cyber' : 'study');
+  _applyModeUI(isCyber);
+  if (isCyber) _startCyberAnim(); else _stopCyberAnim();
+}
+
+function _applyModeUI(isCyber) {
+  document.getElementById('appLogoSub').textContent = isCyber ? 'de Trabajo' : 'de Estudio';
+  document.getElementById('appLogo').firstChild.textContent = isCyber ? '⚡ Rincón ' : '🌿 Rincón ';
+  document.getElementById('msLabel').textContent = isCyber ? 'TRABAJO' : 'ESTUDIO';
+  document.getElementById('modeSwitch').title = isCyber ? 'Volver a Modo Estudio' : 'Cambiar a Modo Trabajo';
+  document.title = isCyber ? 'Rincón de Trabajo' : 'Rincón de Estudio';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Restaurar modo guardado
+  if (localStorage.getItem('rincon_mode') === 'cyber') {
+    document.body.classList.add('cyber');
+    _applyModeUI(true);
+    setTimeout(_startCyberAnim, 300);
+  }
+  // Inicializar módulos flotantes
+  document.querySelectorAll('.module').forEach(m => { makeDraggable(m); initModuleParticles(m); });
+  // Posición inicial junto al sidebar derecho, bajo la barra
+  const vw = window.innerWidth;
+  const px = Math.max(320, vw - 340);
+  const initPos = { pomo:px, tasks:px, postit:px, amb:px, notes:px, spotify:px };
+  const initTop = { pomo:62, tasks:62, postit:62, amb:62, notes:62, spotify:62 };
+  Object.keys(initPos).forEach(key => {
+    const m = document.getElementById('mod-' + key);
+    if (m) { m.style.left = initPos[key] + 'px'; m.style.top = initTop[key] + 'px'; }
+  });
+
+  loadPostits();
+  loadTasks();
+  probeAllStreams();
+  setInterval(reProbeOffline, 5 * 60 * 1000);
+  document.querySelectorAll('.space-card[data-yt]').forEach(card => {
+    const id    = card.dataset.yt;
+    const thumb = card.querySelector('.space-thumb');
+
+    // eliminar emojis (nodos de texto) y badge YT
+    [...thumb.childNodes].forEach(n => { if (n.nodeType === 3) n.remove(); });
+    const badge = thumb.querySelector('.yt-badge');
+    if (badge) badge.remove();
+
+    // thumbnail: maxresdefault → hqdefault como fallback
+    const applyThumb = url => {
+      thumb.style.background         = '';
+      thumb.style.backgroundImage    = `url('${url}')`;
+      thumb.style.backgroundSize     = 'cover';
+      thumb.style.backgroundPosition = 'center';
+    };
+    const imgHD = new Image();
+    imgHD.onload  = () => applyThumb(`https://img.youtube.com/vi/${id}/maxresdefault.jpg`);
+    imgHD.onerror = () => applyThumb(`https://img.youtube.com/vi/${id}/hqdefault.jpg`);
+    imgHD.src = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+
+    // inyectar indicador de estado
+    const ind = document.createElement('div');
+    ind.className = 'stream-indicator';
+    ind.innerHTML = '<span class="stream-dot"></span>';
+    card.appendChild(ind);
+  });
+
+  // ── Modo Cinema: doble clic en el área de video ──
+  document.getElementById('vFocus').addEventListener('dblclick', e => {
+    if (e.target.closest('.sl, .sr, .module, button, input, select')) return;
+    const isCinema = document.body.classList.toggle('cinema');
+
+    const slCollapsed = document.querySelector('.sl').classList.contains('collapsed');
+    const srCollapsed = document.querySelector('.sr').classList.contains('collapsed');
+
+    // Control de volumen sigue al sidebar izquierdo
+    document.getElementById('ytVolCtrl').style.left = (isCinema || slCollapsed) ? '0px' : '320px';
+
+    // Botón fullscreen sigue al sidebar derecho
+    document.getElementById('fsBtn').style.right = (isCinema || srCollapsed) ? '0px' : '64px';
+
+    // Al activar cinema: sidebars se ocultan → restaurar posiciones guardadas
+    // Al desactivar: sidebars vuelven → empujar lo que invada su zona
+    setTimeout(() => {
+      if (isCinema) {
+        restoreBanner('top');
+        if (!slCollapsed) restoreBanner('sl');
+        if (!srCollapsed) restoreBanner('sr');
+      } else {
+        pushBanner('top');
+        if (!slCollapsed) pushBanner('sl');
+        if (!srCollapsed) pushBanner('sr');
+      }
+    }, 30);
+  });
+});
+</script>
+</body>
+</html>
