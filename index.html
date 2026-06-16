@@ -4,6 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Rincón de Estudio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://img.youtube.com" crossorigin>
+<link rel="preconnect" href="https://www.youtube.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&display=swap" rel="stylesheet"></noscript>
 <style>
 /* ── macOS TOKENS ── */
 :root {
@@ -48,6 +54,8 @@ body.cinema .sr{transform:translateX(100%);}
 body.cinema .sidebar-toggle-btn{opacity:0;pointer-events:none;transition:opacity .3s;}
 body.cinema .yt-vol-ctrl{opacity:.18;transition:opacity .35s ease;}
 body.cinema .yt-vol-ctrl:hover{opacity:1;}
+body.cinema .yt-bottom-bar{opacity:.18;transition:opacity .35s ease;}
+body.cinema .yt-bottom-bar:hover{opacity:1;}
 body.cinema .fs-btn{opacity:.18;transition:opacity .35s ease;}
 body.cinema .fs-btn:hover{opacity:1;}
 body.cinema .sidebar-toggle-btn.sl-toggle{left:0;}
@@ -65,7 +73,7 @@ body.cinema .topbar:hover{
   -webkit-backdrop-filter:blur(20px) saturate(180%);
   border-bottom-color:var(--border);
 }
-.logo{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;letter-spacing:-.3px}
+.logo{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;letter-spacing:-.3px;min-width:220px;flex-shrink:0;}
 .logo em{color:var(--muted);font-style:normal;font-weight:400}
 .topbar-nav{display:flex;gap:1px;margin-left:14px}
 .nav-btn{
@@ -106,7 +114,7 @@ body.cinema .topbar:hover{
 }
 .sl.collapsed{transform:translateX(-100%);}
 .section-title{
-  font-size:10px;font-weight:600;letter-spacing:.3px;
+  font-size:11px;font-weight:600;letter-spacing:.3px;
   color:var(--muted);text-transform:uppercase;
   margin:16px 0 7px 4px;
 }
@@ -122,8 +130,8 @@ body.cinema .topbar:hover{
 }
 .active-subject-bar:hover{background:var(--surface2);box-shadow:0 2px 8px var(--shadow)}
 .subj-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.active-subject-bar span{font-size:12px;font-weight:500;flex:1;letter-spacing:-.1px}
-.active-subject-bar small{font-size:10px;color:var(--muted)}
+.active-subject-bar span{font-size:13px;font-weight:500;flex:1;letter-spacing:-.1px}
+.active-subject-bar small{font-size:11px;color:var(--muted)}
 
 .pills{display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
 .pills::-webkit-scrollbar{display:none}
@@ -147,6 +155,18 @@ body.cinema .topbar:hover{
 .space-card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.25)}
 /* offline: overlay oscuro vía ::before para no afectar z-index del indicador */
 .space-card.stream-offline{display:none !important;}
+/* ── Dots de color (espacios sin stream) ── */
+.color-dots-row{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 6px;}
+.color-dot{
+  width:30px;height:30px;border-radius:50%;cursor:pointer;flex-shrink:0;
+  border:2px solid transparent;
+  box-shadow:0 1px 5px rgba(0,0,0,.18);
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+  overflow:visible;
+}
+.color-dot:hover{transform:scale(1.18);box-shadow:0 3px 12px rgba(0,0,0,.28);}
+.color-dot.active{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(0,113,227,.35)!important;transform:scale(1.1);}
+body.cyber .color-dot.active{border-color:#00e5ff!important;box-shadow:0 0 0 3px rgba(0,220,255,.4),0 0 10px rgba(0,200,255,.3)!important;}
 .stream-indicator{
   position:absolute;top:5px;left:5px;display:flex;align-items:center;gap:4px;
   z-index:14;pointer-events:none;
@@ -174,16 +194,15 @@ body.cinema .topbar:hover{
   height:70px;display:flex;align-items:center;justify-content:center;
   font-size:22px;background-size:cover;background-position:center;
   border-radius:6px;overflow:hidden;position:relative;
-  filter:saturate(.55) brightness(.82);
-  transition:transform .28s ease,filter .28s ease;
+  filter:none;
+  transition:transform .28s ease;
 }
-.space-thumb::before{
-  content:'';position:absolute;inset:0;
-  background:rgba(18,18,28,.46);
-  transition:opacity .28s ease;pointer-events:none;z-index:1;
-}
+.space-card:not([data-yt]) .space-thumb{background:var(--bg2);}
+.space-card[data-yt] .space-thumb{filter:brightness(1.5) saturate(0.15);transition:filter .28s ease;}
+.space-card[data-yt]:hover .space-thumb{filter:brightness(1) saturate(1);}
+.space-thumb::before{display:none;}
 .space-name{
-  font-size:10px;padding:4px 5px;
+  font-size:11px;padding:4px 5px;
   background:rgba(255,255,255,.55);
   backdrop-filter:blur(8px);
   text-align:center;color:var(--muted);letter-spacing:-.1px;
@@ -209,7 +228,7 @@ body.cinema .topbar:hover{
 /* YouTube iframe fullscreen background */
 /* ── FULLSCREEN BUTTON ── */
 .fs-btn{
-  position:absolute;bottom:24px;right:48px;z-index:30;
+  position:absolute;bottom:24px;right:64px;z-index:30;
   width:34px;height:34px;
   background:rgba(0,0,0,.28);
   backdrop-filter:blur(14px) saturate(150%);
@@ -272,14 +291,45 @@ body.cinema .topbar:hover{
 @keyframes ray{from{opacity:.45}to{opacity:.85}}
 .particle{position:absolute;border-radius:50%;background:rgba(255,220,140,.55);animation:rise linear infinite;pointer-events:none;z-index:2}
 @keyframes rise{0%{transform:translateY(110vh);opacity:0}8%{opacity:.7}92%{opacity:.3}100%{transform:translateY(-60px);opacity:0}}
-.space-chip{
+.space-bottom-row{
   position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:10;
+  display:flex;align-items:center;gap:8px;
+}
+.space-chip{
   background:rgba(0,0,0,.28);backdrop-filter:blur(16px) saturate(160%);
   -webkit-backdrop-filter:blur(16px) saturate(160%);
   color:rgba(255,255,255,.92);padding:5px 16px;border-radius:20px;
   font-size:11.5px;letter-spacing:-.1px;white-space:nowrap;
   border:1px solid rgba(255,255,255,.18);
+  flex-shrink:0;
 }
+.yt-attribution{
+  display:none;align-items:center;gap:7px;
+  background:rgba(0,0,0,.22);
+  backdrop-filter:blur(16px) saturate(150%);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:20px;padding:5px 7px 5px 13px;
+  font-size:11px;font-weight:400;color:rgba(255,255,255,.68);
+  white-space:nowrap;letter-spacing:-.1px;
+  opacity:0;transform:translateX(-6px);
+  transition:opacity .3s ease,transform .3s ease;
+  flex-shrink:0;
+}
+.yt-attribution.visible{display:flex;}
+.yt-attribution.shown{opacity:1;transform:translateX(0);}
+.yt-attr-btn{
+  color:rgba(255,255,255,.9);text-decoration:none;font-size:10.5px;font-weight:500;
+  background:rgba(255,255,255,.16);border-radius:12px;padding:2px 9px;
+  transition:background .15s;flex-shrink:0;
+}
+.yt-attr-btn:hover{background:rgba(255,255,255,.28);}
+body.cyber .yt-attribution{
+  background:rgba(0,8,20,.6);border-color:rgba(0,220,255,.2);
+  color:rgba(0,220,255,.6);
+}
+body.cyber .yt-attr-btn{background:rgba(0,220,255,.12);color:#00e5ff;}
+body.cyber .yt-attr-btn:hover{background:rgba(0,220,255,.22);}
 
 .yt-vol-ctrl{
   position:absolute;bottom:24px;left:320px;
@@ -326,6 +376,76 @@ body.cinema .topbar:hover{
   accent-color:var(--accent);
 }
 
+/* ── BARRA DE CONTROLES INFERIOR ── */
+.yt-bottom-bar{
+  position:absolute;bottom:58px;left:50%;transform:translateX(-50%);
+  z-index:20;display:none;flex-direction:column;align-items:center;gap:0;
+}
+.yt-bottom-bar.visible{display:flex;}
+.yt-progress-wrap{
+  width:25vw;
+  background:rgba(0,0,0,.32);
+  backdrop-filter:blur(14px) saturate(150%);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  border:1px solid rgba(255,255,255,.2);
+  border-bottom:none;
+  border-radius:10px 10px 0 0;
+  padding:10px 14px 8px;
+  opacity:0;pointer-events:none;
+  transform:translateY(6px);
+  transition:opacity .18s ease,transform .18s ease;
+}
+.yt-bottom-bar.custom:hover .yt-progress-wrap{
+  opacity:1;pointer-events:auto;transform:translateY(0);
+}
+.yt-progress-track{
+  width:100%;height:5px;
+  background:rgba(255,255,255,.25);
+  border-radius:5px;cursor:pointer;position:relative;
+}
+.yt-bottom-bar:not(.custom) .yt-progress-track{cursor:default;}
+.yt-progress-fill{
+  position:absolute;left:0;top:0;height:100%;width:0%;
+  background:rgba(255,255,255,.85);border-radius:5px;
+  pointer-events:none;transition:width .5s linear;
+}
+.yt-bottom-bar.scrubbing .yt-progress-fill{transition:none;}
+.yt-progress-thumb{
+  position:absolute;top:50%;width:12px;height:12px;
+  background:#fff;border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 1px 4px rgba(0,0,0,.4);pointer-events:none;
+  left:0%;opacity:0;transition:opacity .15s;
+}
+.yt-progress-track:hover .yt-progress-thumb,
+.yt-bottom-bar.scrubbing .yt-progress-thumb{opacity:1;}
+.yt-bottom-bar:not(.custom) .yt-progress-thumb{display:none;}
+.yt-progress-time{
+  display:flex;justify-content:space-between;margin-top:7px;
+  font-size:10px;color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;
+  letter-spacing:.2px;
+}
+.yt-bottom-controls{
+  display:flex;align-items:center;gap:2px;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(14px) saturate(150%);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:5px 10px;
+}
+.yt-bottom-bar.custom:hover .yt-bottom-controls{
+  border-radius:0 0 20px 20px;
+  border-top:none;
+}
+.yt-bottom-btn{
+  background:none;border:none;color:rgba(255,255,255,.85);
+  cursor:pointer;padding:4px 9px;border-radius:8px;
+  font-size:12px;font-weight:700;line-height:1;
+  letter-spacing:-.2px;
+  transition:background .12s,color .12s;
+}
+.yt-bottom-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.yt-bottom-btn.play-btn{font-size:15px;padding:4px 12px;}
+
 /* space-card con badge YT */
 .yt-badge{
   position:absolute;top:5px;right:5px;
@@ -340,17 +460,17 @@ body.cinema .topbar:hover{
 }
 .yt-url-input{
   flex:1;padding:6px 9px;border:1px solid var(--border2);border-radius:7px;
-  background:var(--surface);font-size:11px;color:var(--text);outline:none;
+  background:var(--surface);font-size:12.5px;color:var(--text);outline:none;
   font-family:inherit;transition:border .15s;
 }
 .yt-url-input:focus{border-color:red;box-shadow:0 0 0 2px rgba(255,0,0,.12)}
 .btn-yt-load{
   padding:6px 10px;background:red;color:#fff;border:none;
-  border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;
+  border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;
   white-space:nowrap;transition:filter .15s;
 }
 .btn-yt-load:hover{filter:brightness(1.15)}
-.yt-hint{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4}
+.yt-hint{font-size:11.5px;color:var(--muted);margin-bottom:8px;line-height:1.4}
 
 /* ── RIGHT SIDEBAR — lanzador delgado ── */
 .sr{
@@ -371,7 +491,7 @@ body.cinema .topbar:hover{
   align-items:center;justify-content:center;gap:3px;
   font-size:18px;transition:all .15s;
 }
-.mod-launch-btn span{font-size:9.5px;color:var(--muted);letter-spacing:-.1px}
+.mod-launch-btn span{font-size:10.5px;color:var(--muted);letter-spacing:-.1px}
 .mod-launch-btn:hover{background:var(--bg2);}
 .mod-launch-btn.on{background:rgba(0,113,227,.08);border-color:rgba(0,113,227,.3);}
 .mod-launch-btn.on span{color:var(--accent);}
@@ -400,7 +520,7 @@ body.cinema .topbar:hover{
   border-radius:12px 12px 0 0;
   overflow:hidden;
   cursor:grab;
-  font-size:11px;font-weight:600;color:var(--text);letter-spacing:-.1px;
+  font-size:12.5px;font-weight:600;color:var(--text);letter-spacing:-.1px;
   flex-shrink:0;
 }
 .module-header:active{cursor:grabbing;}
@@ -413,8 +533,8 @@ body.cinema .topbar:hover{
 .module-body{overflow-y:auto;overflow-x:hidden;max-height:72vh;}
 .tool-panel{border-bottom:1px solid var(--border);padding:13px 14px;flex-shrink:0}
 .tool-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tool-title{font-size:12px;font-weight:600;color:var(--text);letter-spacing:-.1px}
-.tool-badge{font-size:11px;color:var(--muted)}
+.tool-title{font-size:13.5px;font-weight:600;color:var(--text);letter-spacing:-.1px}
+.tool-badge{font-size:12px;color:var(--muted)}
 
 /* Pomodoro */
 .pomo-modes{
@@ -423,7 +543,7 @@ body.cinema .topbar:hover{
 }
 .mode-btn{
   flex:1;padding:4px 3px;border-radius:6px;border:none;
-  background:transparent;font-size:10px;cursor:pointer;
+  background:transparent;font-size:11.5px;cursor:pointer;
   color:var(--muted);transition:all .15s;letter-spacing:-.1px;
 }
 .mode-btn.active{
@@ -434,14 +554,14 @@ body.cinema .topbar:hover{
 .ring-wrap svg{transform:rotate(-90deg)}
 .ring-time{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:21px;font-weight:300;color:var(--text);letter-spacing:-1px;
+  font-size:24px;font-weight:300;color:var(--text);letter-spacing:-1px;
   font-variant-numeric:tabular-nums;
 }
-.ring-label{text-align:center;font-size:10px;color:var(--muted);letter-spacing:.2px;margin-bottom:10px}
+.ring-label{text-align:center;font-size:11.5px;color:var(--muted);letter-spacing:.2px;margin-bottom:10px}
 .pomo-btns{display:flex;gap:6px}
 .btn-start{
   flex:1;padding:7px;background:var(--accent);color:#fff;border:none;
-  border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;
+  border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;
   transition:filter .15s;letter-spacing:-.1px;
 }
 .btn-start:hover{filter:brightness(1.1)}
@@ -460,7 +580,7 @@ body.cinema .topbar:hover{
 .task-input{
   flex:1;padding:6px 9px;
   border:1px solid var(--border2);border-radius:7px;
-  background:var(--surface);font-size:12px;color:var(--text);
+  background:var(--surface);font-size:13px;color:var(--text);
   outline:none;transition:border .15s;font-family:inherit;
 }
 .task-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.15)}
@@ -481,14 +601,14 @@ body.cinema .topbar:hover{
 .t-check{
   width:16px;height:16px;border-radius:50%;
   border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:9px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
   transition:all .15s;
 }
 .t-check.done{background:var(--green);border-color:var(--green);color:#fff}
-.t-text{flex:1;font-size:12px;letter-spacing:-.1px}
+.t-text{flex:1;font-size:13px;letter-spacing:-.1px}
 .t-text.done{text-decoration:line-through;color:var(--muted)}
 .expand-btn{
-  background:none;border:none;cursor:pointer;font-size:11px;
+  background:none;border:none;cursor:pointer;font-size:12px;
   color:var(--muted);padding:0 2px;line-height:1;transition:color .15s;
 }
 .expand-btn:hover{color:var(--text)}
@@ -498,14 +618,14 @@ body.cinema .topbar:hover{
 .st-check{
   width:13px;height:13px;border-radius:3px;
   border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:8px;
+  display:flex;align-items:center;justify-content:center;font-size:9px;
   transition:all .15s;
 }
 .st-check.done{background:var(--green);border-color:var(--green);color:#fff}
-.st-text{font-size:11px;color:var(--muted);flex:1}
+.st-text{font-size:12px;color:var(--muted);flex:1}
 .st-text.done{text-decoration:line-through}
 .add-subtask{
-  background:none;border:none;font-size:11px;color:var(--accent);
+  background:none;border:none;font-size:12.5px;color:var(--accent);
   cursor:pointer;padding:2px 0;text-align:left;transition:opacity .15s;
 }
 .add-subtask:hover{opacity:.7}
@@ -515,8 +635,8 @@ body.cinema .topbar:hover{
   background:var(--surface2);border-radius:10px;padding:10px 12px;
   border:1px solid var(--border);
 }
-.music-track{font-size:12px;font-weight:500;margin-bottom:1px;letter-spacing:-.15px}
-.music-sub{font-size:10.5px;color:var(--muted);margin-bottom:9px}
+.music-track{font-size:13px;font-weight:500;margin-bottom:1px;letter-spacing:-.15px}
+.music-sub{font-size:12px;color:var(--muted);margin-bottom:9px}
 .progress-bar{height:2px;background:var(--bg2);border-radius:2px;margin-bottom:9px;cursor:pointer}
 .progress-fill{height:100%;width:38%;background:var(--accent);border-radius:2px}
 .music-ctrl{display:flex;align-items:center;justify-content:center;gap:16px}
@@ -537,7 +657,7 @@ body.cinema .topbar:hover{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;font-size:17px;transition:all .15s;
 }
-.sound-btn span{font-size:9px;color:var(--muted);letter-spacing:-.1px}
+.sound-btn span{font-size:10.5px;color:var(--muted);letter-spacing:-.1px}
 .sound-btn:hover{background:var(--bg2);border-color:var(--border2)}
 .sound-btn.on{
   background:rgba(0,113,227,.08);border-color:rgba(0,113,227,.3);
@@ -559,7 +679,7 @@ body.cinema .topbar:hover{
 .notes-area{
   width:100%;min-height:72px;padding:8px 10px;
   border:1px solid var(--border);border-radius:8px;
-  background:var(--surface);font-size:12px;color:var(--text);
+  background:var(--surface);font-size:13px;color:var(--text);
   resize:vertical;outline:none;font-family:inherit;line-height:1.55;
 }
 .notes-area:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,113,227,.12)}
@@ -683,6 +803,58 @@ body.cinema .topbar:hover{
 
 /* ── CALENDARIO ── */
 #vCalendario{flex-direction:row;overflow:hidden}
+
+/* ── ACERCA DE ── */
+#vAcerca{flex-direction:column;overflow-y:auto;padding:48px 0;background:var(--bg);align-items:center;}
+.about-wrap{max-width:620px;width:100%;padding:0 24px;}
+.about-hero{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  margin-bottom:44px;
+}
+.about-hero-icon{font-size:52px;margin-bottom:12px;line-height:1;}
+.about-hero h1{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;
+  font-size:30px;font-weight:200;letter-spacing:-1.2px;color:var(--text);margin-bottom:6px;
+}
+.about-hero p{font-size:13px;color:var(--muted);letter-spacing:-.1px;}
+.about-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px 32px;margin-bottom:16px;
+  box-shadow:0 1px 6px var(--shadow);
+}
+.about-card h2{
+  font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.2px;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.about-card p{
+  font-size:13px;color:var(--muted);line-height:1.75;font-weight:400;
+  margin-bottom:10px;
+}
+.about-card p:last-child{margin-bottom:0;}
+.about-card ul{
+  list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column;gap:8px;
+}
+.about-card ul li{
+  font-size:13px;color:var(--muted);line-height:1.6;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.about-card ul li::before{content:attr(data-icon);font-size:15px;flex-shrink:0;margin-top:1px;}
+.about-free-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.3);
+  border-radius:20px;padding:6px 14px;
+  font-size:12px;font-weight:500;color:#1a8c3a;
+  margin-bottom:14px;
+}
+.about-signature{
+  text-align:right;margin-top:28px;padding-top:20px;
+  border-top:1px solid var(--border);
+  font-size:13px;color:var(--muted);font-style:italic;
+}
+body.cyber #vAcerca{background:var(--bg);}
+body.cyber .about-card{background:var(--surface);border-color:var(--border);}
+body.cyber .about-hero h1{color:var(--text);}
+body.cyber .about-free-badge{background:rgba(0,220,255,.08);border-color:rgba(0,220,255,.25);color:#00e5ff;}
 .cal-left{
   width:224px;flex-shrink:0;
   background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
@@ -772,7 +944,7 @@ body.cinema .topbar:hover{
   border-top:1px solid var(--border);
 }
 .sp-input{
-  flex:1;font-size:11px;padding:5px 8px;
+  flex:1;font-size:12.5px;padding:5px 8px;
   border:1px solid var(--border);border-radius:6px;
   background:var(--surface);color:var(--text);outline:none;
   transition:border-color .15s;
@@ -874,7 +1046,7 @@ body.cyber .logo{
   letter-spacing:1.5px;text-transform:uppercase;
 }
 body.cyber .logo em{color:#ff2ef8;text-shadow:0 0 9px rgba(255,46,248,.65);}
-body.cyber .nav-btn{color:#8aaace;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.2px;}
+body.cyber .nav-btn{color:#8aaace;font-family:'Courier New',monospace;font-size:12px;letter-spacing:.2px;}
 body.cyber .nav-btn.active{background:rgba(0,220,255,.14);color:#00e5ff;font-weight:700;}
 body.cyber .nav-btn:hover{color:#00e5ff;background:rgba(0,220,255,.08);}
 body.cyber .btn-pro{background:rgba(255,46,248,.14);color:#ff2ef8;border:1px solid rgba(255,46,248,.4);font-weight:700;}
@@ -984,6 +1156,19 @@ body.cyber .yt-vol-ctrl{
 body.cyber .yt-ctrl-divider{background:rgba(0,220,255,.2);}
 body.cyber .yt-seek-btn{background:rgba(0,220,255,.08);}
 body.cyber .yt-seek-btn:hover{background:rgba(0,220,255,.2);}
+body.cyber .yt-bottom-controls{
+  background:rgba(8,8,24,.9);border-color:rgba(0,220,255,.28);
+  box-shadow:0 0 16px rgba(0,180,255,.1);
+}
+body.cyber .yt-bottom-btn{color:rgba(0,220,255,.9);}
+body.cyber .yt-bottom-btn:hover{background:rgba(0,220,255,.14);color:#00e5ff;}
+body.cyber .yt-progress-wrap{
+  background:rgba(8,8,24,.92);border-color:rgba(0,220,255,.28);
+}
+body.cyber .yt-progress-track{background:rgba(0,220,255,.18);}
+body.cyber .yt-progress-fill{background:#00e5ff;box-shadow:0 0 6px rgba(0,200,255,.5);}
+body.cyber .yt-progress-thumb{background:#00e5ff;box-shadow:0 0 8px rgba(0,200,255,.8);}
+body.cyber .yt-progress-time{color:rgba(0,220,255,.55);}
 body.cyber .floating-postit{border-color:rgba(0,220,255,.25)!important;box-shadow:0 0 14px rgba(0,180,255,.14)!important;}
 body.cyber #ytFrame{filter:contrast(1.06) saturate(1.12);}
 body.cyber #cyberCanvas{display:block!important;}
@@ -1024,9 +1209,6 @@ body.cyber .ms-track{background:rgba(0,220,255,.18);border-color:rgba(0,220,255,
 body.cyber .ms-thumb{background:#00e5ff;left:15px;box-shadow:0 0 8px rgba(0,200,255,.9);}
 body.cyber .ms-label{color:#00e5ff;font-family:'Courier New',monospace;}
 /* Cyber vs Study spaces visibility */
-#cyberSpaces{display:none;}
-body.cyber #studySpaces{display:none;}
-body.cyber #cyberSpaces{display:block;}
 /* Cyber thumb gradients */
 .bg-neotokyo{background:linear-gradient(135deg,#0a001f,#1a003a,#2a0050);display:flex;align-items:center;justify-content:center;font-size:22px;}
 .bg-gridrunner{background:linear-gradient(135deg,#000a18,#001a30,#00253a);display:flex;align-items:center;justify-content:center;font-size:22px;}
@@ -1036,25 +1218,122 @@ body.cyber #cyberSpaces{display:block;}
 .bg-vapordream{background:linear-gradient(135deg,#1a0a30,#3a1a70,#6a1a9a);display:flex;align-items:center;justify-content:center;font-size:22px;}
 .bg-bladerunner{background:linear-gradient(135deg,#1a0a00,#3a1800,#2a0a1a);display:flex;align-items:center;justify-content:center;font-size:22px;}
 .bg-chromevoid{background:linear-gradient(135deg,#0a0a20,#151530,#202040);display:flex;align-items:center;justify-content:center;font-size:22px;}
+
+/* ── SPLASH SCREEN ── */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  background:#f5f5f7;
+  opacity:1;transition:opacity .8s cubic-bezier(.4,0,.2,1);
+}
+#splash.out{opacity:0;pointer-events:none;}
+.splash-inner{
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;text-align:center;
+}
+.splash-app-name{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;
+  font-size:64px;font-weight:200;letter-spacing:-2.5px;color:#1d1d1f;
+  animation:apple-hello 1.6s cubic-bezier(.25,.46,.45,.94) both;
+  margin-bottom:16px;
+}
+.splash-bienvenido{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:34px;font-weight:300;font-style:italic;color:#6e6e73;letter-spacing:.3px;
+  min-height:42px;
+  margin-bottom:40px;
+  white-space:nowrap;
+}
+@keyframes letter-emerge{
+  0%  {opacity:0;filter:blur(7px);transform:translateY(6px);}
+  100%{opacity:1;filter:blur(0);transform:translateY(0);}
+}
+@keyframes emoji-drift{
+  0%  {opacity:0;transform:translateY(0) scale(.7);}
+  20% {opacity:.6;transform:translateY(-7px) scale(1);}
+  75% {opacity:.4;transform:translateY(-18px) scale(1);}
+  100%{opacity:0;transform:translateY(-30px) scale(.85);}
+}
+.splash-bienvenido .cl{
+  display:inline-block;
+  opacity:0;
+  animation:letter-emerge .6s cubic-bezier(.22,.61,.36,1) forwards;
+}
+@keyframes apple-hello{
+  0%  {opacity:0;filter:blur(28px);transform:scale(1.12);}
+  60% {opacity:1;}
+  100%{opacity:1;filter:blur(0);transform:scale(1);}
+}
+/* Formulario de nombre */
+.splash-name-form{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  animation:apple-hello .9s cubic-bezier(.25,.46,.45,.94) both;
+  margin-bottom:40px;
+}
+.splash-name-form.hidden{display:none;}
+.splash-ask{
+  font-size:17px;font-weight:400;color:#1d1d1f;letter-spacing:-.2px;margin:0;
+}
+.splash-input-row{display:flex;gap:8px;}
+.splash-name-input{
+  padding:10px 16px;border-radius:10px;
+  border:1px solid rgba(0,0,0,.14);background:#fff;
+  font-size:16px;font-family:inherit;color:#1d1d1f;
+  outline:none;width:210px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.splash-name-input:focus{
+  border-color:#0071e3;
+  box-shadow:0 0 0 3px rgba(0,113,227,.16);
+}
+.splash-name-btn{
+  padding:10px 18px;background:#1d1d1f;color:#fff;
+  border:none;border-radius:10px;font-size:17px;
+  cursor:pointer;transition:background .15s;line-height:1;
+}
+.splash-name-btn:hover{background:#333;}
+/* Barra de carga */
+.splash-track{
+  width:130px;height:2px;background:rgba(0,0,0,.08);
+  border-radius:2px;overflow:hidden;
+}
+.splash-fill{
+  height:100%;width:0;background:#0071e3;border-radius:2px;
+  transition:width .08s linear;
+}
 </style>
 </head>
 <body>
 
+<!-- ── SPLASH ── -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-app-name">🌿 Rincón de Estudio</div>
+    <div class="splash-bienvenido" id="splashBienvenido"></div>
+    <div class="splash-name-form hidden" id="splashNameForm">
+      <p class="splash-ask">¿Cómo te llamas?</p>
+      <div class="splash-input-row">
+        <input id="splashNameInput" class="splash-name-input" type="text"
+               placeholder="Tu nombre" maxlength="30" autocomplete="off">
+        <button class="splash-name-btn" onclick="submitSplashName()">→</button>
+      </div>
+    </div>
+    <div class="splash-track"><div class="splash-fill" id="splashFill"></div></div>
+  </div>
+</div>
+
 <!-- ═══════════════════ TOPBAR ═══════════════════ -->
 <header class="topbar">
   <div class="logo" id="appLogo">🌿 Rincón <em id="appLogoSub">de Estudio</em></div>
-  <div class="mode-switch" onclick="toggleCyberMode()" id="modeSwitch" title="Cambiar a Modo Trabajo">
-    <div class="ms-track"><div class="ms-thumb"></div></div>
-    <span class="ms-label" id="msLabel">ESTUDIO</span>
-  </div>
+
   <nav class="topbar-nav">
     <button class="nav-btn active" onclick="switchView('vFocus',this)">🏠 Enfoque</button>
     <button class="nav-btn" onclick="switchView('vNovedades',this)">📰 Novedades</button>
     <button class="nav-btn" onclick="switchView('vAsignaturas',this)">📚 Asignaturas</button>
     <button class="nav-btn" onclick="switchView('vCalendario',this)">📅 Calendario</button>
+    <button class="nav-btn" onclick="switchView('vAcerca',this)">🌿 Acerca de</button>
   </nav>
   <div class="topbar-right">
-    <button class="btn-pro">✨ Pro</button>
     <div class="avatar">M</div>
   </div>
 </header>
@@ -1085,31 +1364,26 @@ body.cyber #cyberSpaces{display:block;}
       <button class="pill" onclick="filterSpaces(this,'anime')">🌸</button>
       <button class="pill" onclick="filterSpaces(this,'cafe')">☕</button>
       <button class="pill" onclick="filterSpaces(this,'biblioteca')">📚</button>
-      <button class="pill" onclick="filterSpaces(this,'trabajo')">💼</button>
+      <button class="pill" onclick="filterSpaces(this,'calavera')">💀</button>
       <button class="pill" onclick="filterSpaces(this,'lluvia')">🌧️</button>
       <button class="pill" onclick="filterSpaces(this,'natura')">🌿</button>
       <button class="pill" onclick="shuffleStream()" title="Stream aleatorio">🔀</button>
     </div>
     <div class="sl-section">
-    <div class="spaces-grid" id="spacesGrid">
-      <div class="space-card active" data-tag="cafe" data-name="Café Tranquilo" data-bg="linear-gradient(135deg,#8b6e52 0%,#4a3525 40%,#2d1a10 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-cafe">☕</div><div class="space-name">Café Tranquilo</div></div>
-      <div class="space-card" data-tag="natura" data-name="Bosque Lluvioso" data-bg="linear-gradient(135deg,#1a4d1a 0%,#2e7d2e 50%,#0d2b0d 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-bosque">🌿</div><div class="space-name">Bosque Lluvioso</div></div>
-      <div class="space-card" data-tag="lofi" data-name="Ciudad Nocturna" data-bg="linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#080614 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-ciudad">🌃</div><div class="space-name">Ciudad Nocturna</div></div>
-      <div class="space-card" data-tag="biblioteca" data-name="Biblioteca" data-bg="linear-gradient(135deg,#2c3e50 0%,#34495e 60%,#1a2535 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-biblio">📚</div><div class="space-name">Biblioteca</div></div>
-      <div class="space-card" data-tag="natura" data-name="Playa Atardecer" data-bg="linear-gradient(135deg,#1a7ec0 0%,#f08030 50%,#c04010 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-playa">🌊</div><div class="space-name">Playa Atardecer</div></div>
-      <div class="space-card" data-tag="lluvia" data-name="Lluvia en Casa" data-bg="linear-gradient(135deg,#3a4a5a 0%,#5b7080 60%,#2a3545 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-lluvia">🌧️</div><div class="space-name">Lluvia en Casa</div></div>
-      <div class="space-card" data-tag="lofi" data-name="Lo-Fi Animado" data-bg="linear-gradient(135deg,#2d1b69 0%,#11998e 60%,#1a0e4a 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-lofi">🎵</div><div class="space-name">Lo-Fi Animado</div></div>
-      <div class="space-card" data-tag="natura" data-name="Jardín Secreto" data-bg="linear-gradient(135deg,#134e5e 0%,#71b280 60%,#0c3040 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-jardin">🌸</div><div class="space-name">Jardín Secreto</div></div>
-    </div>
-    </div>
-
-    <div class="sl-section">
-      <div class="section-title">🌎 Espacios Latinos</div>
-      <div class="spaces-grid">
-        <div class="space-card" data-tag="cafe" data-name="Mercado CDMX" data-bg="linear-gradient(135deg,#c0392b 0%,#e67e22 60%,#7d2418 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-cdmx">🌮</div><div class="space-name">Mercado CDMX</div></div>
-        <div class="space-card" data-tag="cafe" data-name="Café Porteño" data-bg="linear-gradient(135deg,#2c3e50 0%,#8e9eab 60%,#1a2535 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-porteno">🐂</div><div class="space-name">Café Porteño</div></div>
-        <div class="space-card" data-tag="natura" data-name="Selva Amazónica" data-bg="linear-gradient(135deg,#1a4d1a 0%,#27ae60 50%,#0d2b0d 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-selva">🦜</div><div class="space-name">Selva Amazónica</div></div>
-        <div class="space-card" data-tag="natura" data-name="Altiplano Andino" data-bg="linear-gradient(135deg,#4568dc 0%,#b06ab3 60%,#1a2870 100%)" onclick="selectSpace(this)"><div class="space-thumb bg-andino">⛰️</div><div class="space-name">Altiplano Andino</div></div>
+      <div class="section-title">🎨 Color</div>
+      <div class="color-dots-row">
+        <div class="space-card color-dot active" data-tag="cafe"     data-name="Café Tranquilo"  data-bg="linear-gradient(135deg,#8b6e52,#4a3525)" onclick="selectSpace(this)" title="Café Tranquilo"  style="background:linear-gradient(135deg,#8b6e52,#4a3525)"></div>
+        <div class="space-card color-dot"        data-tag="natura"   data-name="Bosque Lluvioso" data-bg="linear-gradient(135deg,#1a4d1a,#2e7d2e)" onclick="selectSpace(this)" title="Bosque Lluvioso" style="background:linear-gradient(135deg,#1a4d1a,#2e7d2e)"></div>
+        <div class="space-card color-dot"        data-tag="lofi"     data-name="Ciudad Nocturna" data-bg="linear-gradient(135deg,#0f0c29,#302b63)" onclick="selectSpace(this)" title="Ciudad Nocturna" style="background:linear-gradient(135deg,#0f0c29,#302b63)"></div>
+        <div class="space-card color-dot"        data-tag="biblioteca" data-name="Biblioteca"   data-bg="linear-gradient(135deg,#2c3e50,#34495e)" onclick="selectSpace(this)" title="Biblioteca"      style="background:linear-gradient(135deg,#2c3e50,#34495e)"></div>
+        <div class="space-card color-dot"        data-tag="natura"   data-name="Playa Atardecer" data-bg="linear-gradient(135deg,#1a7ec0,#f08030)" onclick="selectSpace(this)" title="Playa Atardecer" style="background:linear-gradient(135deg,#1a7ec0,#f08030)"></div>
+        <div class="space-card color-dot"        data-tag="lluvia"   data-name="Lluvia en Casa"  data-bg="linear-gradient(135deg,#3a4a5a,#5b7080)" onclick="selectSpace(this)" title="Lluvia en Casa"  style="background:linear-gradient(135deg,#3a4a5a,#5b7080)"></div>
+        <div class="space-card color-dot"        data-tag="lofi"     data-name="Lo-Fi Animado"   data-bg="linear-gradient(135deg,#2d1b69,#11998e)" onclick="selectSpace(this)" title="Lo-Fi Animado"   style="background:linear-gradient(135deg,#2d1b69,#11998e)"></div>
+        <div class="space-card color-dot"        data-tag="natura"   data-name="Jardín Secreto"  data-bg="linear-gradient(135deg,#134e5e,#71b280)" onclick="selectSpace(this)" title="Jardín Secreto"  style="background:linear-gradient(135deg,#134e5e,#71b280)"></div>
+        <div class="space-card color-dot"        data-tag="cafe"     data-name="Mercado CDMX"    data-bg="linear-gradient(135deg,#c0392b,#e67e22)" onclick="selectSpace(this)" title="Mercado CDMX"    style="background:linear-gradient(135deg,#c0392b,#e67e22)"></div>
+        <div class="space-card color-dot"        data-tag="cafe"     data-name="Café Porteño"    data-bg="linear-gradient(135deg,#2c3e50,#8e9eab)" onclick="selectSpace(this)" title="Café Porteño"    style="background:linear-gradient(135deg,#2c3e50,#8e9eab)"></div>
+        <div class="space-card color-dot"        data-tag="natura"   data-name="Selva Amazónica" data-bg="linear-gradient(135deg,#1a4d1a,#27ae60)" onclick="selectSpace(this)" title="Selva Amazónica" style="background:linear-gradient(135deg,#1a4d1a,#27ae60)"></div>
+        <div class="space-card color-dot"        data-tag="natura"   data-name="Altiplano Andino" data-bg="linear-gradient(135deg,#4568dc,#b06ab3)" onclick="selectSpace(this)" title="Altiplano Andino" style="background:linear-gradient(135deg,#4568dc,#b06ab3)"></div>
       </div>
     </div>
 
@@ -1117,17 +1391,17 @@ body.cyber #cyberSpaces{display:block;}
       <div class="section-title">🎧 Lofi Clásico</div>
       <div class="spaces-grid">
         <div class="space-card" data-tag="lofi" data-name="Lofi Girl" data-yt="jfKfPfyJRdk" data-bg="linear-gradient(135deg,#2d1b69,#11998e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Girl</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Lofi Universe" data-yt="lglp8p685Lg" data-bg="linear-gradient(135deg,#0a0a1a,#1a0a3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Universe</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Anime Lofi 24/7" data-yt="WDXPJWIgX-o" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Anime Lofi</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Anime & Videojuegos" data-yt="7g_02XViuSc" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Anime & Games</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Synthwave City" data-yt="4xDzrJKXOOY" data-bg="linear-gradient(135deg,#0f0c29,#302b63)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Synthwave City</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Lo-Fi Latino" data-yt="5qap5aO4i9A" data-bg="linear-gradient(135deg,#c0392b,#e67e22)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lo-Fi Latino</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Lofi Hip Hop 2021" data-yt="n61ULEU7CO0" data-bg="linear-gradient(135deg,#2d1b69,#11998e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Hip Hop</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Lofi Sleep Radio" data-yt="DWcJFNfaw9c" data-bg="linear-gradient(135deg,#0a0a1a,#1a0a3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Sleep Radio</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Lofi Chill Radio" data-yt="rUxyKA_-grg" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Chill Radio</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Chill Lofi Mix" data-yt="CLeZyIID9Bo" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chill Lofi Mix</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Lofi Study Radio" data-yt="hHW1oY26kxQ" data-bg="linear-gradient(135deg,#2d1b69,#6e3a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Study Radio</div></div>
-        <div class="space-card" data-tag="lofi" data-name="Chillhop Radio" data-yt="5yx6BWlEVcY" data-bg="linear-gradient(135deg,#1a3a2a,#2e7d5e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chillhop Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Sleep Radio" data-yt="rUxyKA_-grg" data-bg="linear-gradient(135deg,#0a0a1a,#1a0a3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Sleep Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Hip Hop Radio" data-yt="5qap5aO4i9A" data-bg="linear-gradient(135deg,#2d1b69,#11998e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Hip Hop</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Asian Lofi Radio" data-yt="Na0w3Mz46GA" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Asian Lofi</div></div>
+        <div class="space-card" data-tag="lofi" data-name="24/7 Lofi Hip Hop" data-yt="wkhLHTmS_GI" data-bg="linear-gradient(135deg,#0f0c29,#302b63)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi 24/7</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Deep Focus Lofi" data-yt="iFA8XRsFTlE" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Focus</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Jazz Lofi Radio" data-yt="kgx4WGK0oNU" data-bg="linear-gradient(135deg,#2c3e50,#8e6e40)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Jazz Lofi</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Study Focus" data-yt="jU931iVImjI" data-bg="linear-gradient(135deg,#2d1b69,#6e3a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Study Focus</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Chill Lofi Beats" data-yt="DGBLvi795tc" data-bg="linear-gradient(135deg,#1a3a2a,#2e7d5e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chill Beats</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Radio" data-yt="mhULHGtDMDY" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Chillhop Radio" data-yt="v_E6AO97KpI" data-bg="linear-gradient(135deg,#1a3a2a,#2e7d5e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chillhop Radio</div></div>
+        <div class="space-card" data-tag="lofi" data-name="Lofi Beats Relax" data-yt="KjlLkXnScos" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Beats</div></div>
       </div>
     </div>
 
@@ -1178,6 +1452,33 @@ body.cyber #cyberSpaces{display:block;}
         <div class="space-card" data-tag="cafe" data-name="Café Nocturno" data-yt="q1C-MLuzOzw" data-bg="linear-gradient(135deg,#1a1a2e,#2a1510)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Café Nocturno</div></div>
         <div class="space-card" data-tag="cafe" data-name="Coffee Jazz 24/7" data-yt="fEvM-OUbaKs" data-bg="linear-gradient(135deg,#3e2010,#6e4020)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Coffee Jazz 24/7</div></div>
         <div class="space-card" data-tag="cafe" data-name="Rainy Jazz Café" data-yt="NJuSStkIZBg" data-bg="linear-gradient(135deg,#2a3545,#3a4a30)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Jazz Café</div></div>
+        <div class="space-card" data-tag="cafe" data-vod="1" data-name="Mornings in the Cafe" data-yt="4xCRgK79DJ4" data-bg="linear-gradient(135deg,#3e2a10,#6e4c20)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Mornings Café</div></div>
+        <div class="space-card" data-tag="cafe" data-vod="1" data-name="My Favourite Café" data-yt="VW5PuVELHG8" data-bg="linear-gradient(135deg,#2e1a08,#5a3a18)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Favourite Café</div></div>
+        <div class="space-card" data-tag="cafe" data-vod="1" data-name="A Peaceful Place" data-yt="DbuebKNKQsQ" data-bg="linear-gradient(135deg,#1a2a3a,#2e4a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">A Peaceful Place</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🌧️ Habitaciones & Lluvia</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Cozy Study Room Rain" data-yt="bJYWQy0dc-g" data-bg="linear-gradient(135deg,#1a2535,#2a3a50)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Study Room Rain</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Rainy Street View" data-yt="YrhrlN3ngM4" data-bg="linear-gradient(135deg,#1e2d3a,#2a3e50)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Street View</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Rainy Coastline" data-yt="oirs_W6Irq8" data-bg="linear-gradient(135deg,#1a2a3a,#253a55)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Coastline</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Paris Rain Study Room" data-yt="lo0_2tU9b2o" data-bg="linear-gradient(135deg,#1e2535,#2e3a4a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Paris Rain Room</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Mountain Lake Rain" data-yt="Sj1SU7hIDMY" data-bg="linear-gradient(135deg,#0e1e2a,#1a3040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Mountain Lake Rain</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Swiss Alps Rain" data-yt="ImzMEOwIHVw" data-bg="linear-gradient(135deg,#14202e,#1e3045)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Swiss Alps Rain</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Miami Apartment Rain" data-yt="QUqhgZjrrsE" data-bg="linear-gradient(135deg,#1a1520,#2d2535)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Miami Apartment</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Chicago Apartment Rain" data-yt="6UsqalA78Wk" data-bg="linear-gradient(135deg,#0e1520,#1a2535)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chicago Apartment</div></div>
+        <div class="space-card" data-tag="lluvia" data-vod="1" data-name="Manhattan Apartment Rain" data-yt="7iAFWiZTb34" data-bg="linear-gradient(135deg,#121824,#1e2a3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Manhattan Apartment</div></div>
+      </div>
+    </div>
+
+    <div class="sl-section">
+      <div class="section-title">🌿 Naturaleza & Meditación</div>
+      <div class="spaces-grid">
+        <div class="space-card" data-tag="natura" data-vod="1" data-name="Garden Ambience Morning" data-yt="TvMaJipb990" data-bg="linear-gradient(135deg,#1a3a18,#2e5a28)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Garden Morning</div></div>
+        <div class="space-card" data-tag="natura" data-vod="1" data-name="Spring Garden Sounds" data-yt="oZScxxVDfSs" data-bg="linear-gradient(135deg,#1e4018,#2a5a22)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Spring Garden</div></div>
+        <div class="space-card" data-tag="natura" data-vod="1" data-name="Forest Evening Sounds" data-yt="94AMfx5B2Mg" data-bg="linear-gradient(135deg,#0e2210,#183018)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Forest Evening</div></div>
       </div>
     </div>
 
@@ -1197,144 +1498,59 @@ body.cyber #cyberSpaces{display:block;}
     </div>
 
     <div class="sl-section">
-      <div class="section-title">💼 Trabajo & Foco</div>
+      <div class="section-title">💀 Calavera</div>
       <div class="spaces-grid">
-        <div class="space-card" data-tag="trabajo" data-name="Lofi Work 24/7" data-yt="ByZGu229-yA" data-bg="linear-gradient(135deg,#1a2035,#2d4a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Work 24/7</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Deep Work 24/7" data-yt="a_7CxCnXbCY" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Work 24/7</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Coding Bora Bora" data-yt="zSCPJuZKlFw" data-bg="linear-gradient(135deg,#004d60,#00bcd4)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Coding Bora Bora</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Cyberpunk Dark" data-yt="3watZEdqp_c" data-bg="linear-gradient(135deg,#0d0221,#1a0040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyberpunk Dark</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Chill Beats Live" data-yt="uOqGBYs4VAc" data-bg="linear-gradient(135deg,#1a2a3a,#2a3a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chill Beats Live</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Bosque Japón" data-yt="f4wkXCpoRtg" data-bg="linear-gradient(135deg,#0d2010,#1a3820)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Bosque Japón</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Code.fi Lofi" data-yt="f02mOEt11OQ" data-bg="linear-gradient(135deg,#0d1b2a,#0a2744)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Code.fi Lofi</div></div>
-        <div class="space-card" data-tag="trabajo" data-name="Brown Noise 8H" data-yt="RqzGzwTY-6w" data-bg="linear-gradient(135deg,#1a1510,#2e2a20)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Brown Noise 8H</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Lofi Work 24/7" data-yt="ByZGu229-yA" data-bg="linear-gradient(135deg,#1a2035,#2d4a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lofi Work</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Deep Work 24/7" data-yt="a_7CxCnXbCY" data-bg="linear-gradient(135deg,#0d1b2a,#1b4f72)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Work</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Coding Bora Bora" data-yt="zSCPJuZKlFw" data-bg="linear-gradient(135deg,#004d60,#00bcd4)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Coding Bora Bora</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Cyberpunk Dark" data-yt="3watZEdqp_c" data-bg="linear-gradient(135deg,#0d0221,#1a0040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyberpunk Dark</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Chill Beats Live" data-yt="uOqGBYs4VAc" data-bg="linear-gradient(135deg,#1a2a3a,#2a3a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Chill Beats Live</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Bosque Japón" data-yt="f4wkXCpoRtg" data-bg="linear-gradient(135deg,#0d2010,#1a3820)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Bosque Japón</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Code.fi Lofi" data-yt="f02mOEt11OQ" data-bg="linear-gradient(135deg,#0d1b2a,#0a2744)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Code.fi Lofi</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Brown Noise 8H" data-yt="RqzGzwTY-6w" data-bg="linear-gradient(135deg,#1a1510,#2e2a20)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Brown Noise</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Cyber Grid" data-yt="pnVRrq06t2U" data-bg="linear-gradient(135deg,#0a0530,#1e0a60,#300a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Grid</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Dark Signal" data-yt="EflFUfrYJVE" data-bg="linear-gradient(135deg,#120030,#280060,#1a004a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Signal</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Outrun Drive" data-yt="zQ0MhOnVW4c" data-bg="linear-gradient(135deg,#0a0520,#2a0a5a,#4a0a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Outrun Drive</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Neon Horizon" data-yt="UedTcufyrHc" data-bg="linear-gradient(135deg,#1a0a30,#3a1060,#0a0a2a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Horizon</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Retro Override" data-yt="b3P_8GWq_i0" data-bg="linear-gradient(135deg,#0d0221,#1a0040,#2a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Retro Override</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Power Grid" data-yt="xFvFpFGpbPY" data-bg="linear-gradient(135deg,#000a2a,#001a4a,#00254a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Power Grid</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Dark Electro" data-yt="OQnHNzJdHrU" data-bg="linear-gradient(135deg,#0a0028,#1a0050,#2a0060)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Electro</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Synth Overdrive" data-yt="x9OBM1OAQOE" data-bg="linear-gradient(135deg,#14002a,#280052,#1a0040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Synth Overdrive</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Electric Pulse" data-yt="kLCeQqv5G4o" data-bg="linear-gradient(135deg,#080020,#180048,#200058)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electric Pulse</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Neon Signal" data-yt="jzEN2VIE9Fo" data-bg="linear-gradient(135deg,#0a001e,#1e0048,#2a005a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Signal</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Dark Electro CW" data-yt="34H1XIjnfKM" data-bg="linear-gradient(135deg,#050010,#0f0030,#18004a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Electro CW</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Neon Underground" data-yt="AswR2woOGj0" data-bg="linear-gradient(135deg,#080018,#160030,#200040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Underground</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Void Protocol" data-yt="TuOHPaR0bDI" data-bg="linear-gradient(135deg,#050014,#0d002c,#160040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Void Protocol</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Blackout" data-yt="wpVBjOvmrZU" data-bg="linear-gradient(135deg,#060010,#10002a,#180038)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Blackout</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Neural Hack" data-yt="V_aFPWqMwho" data-bg="linear-gradient(135deg,#001400,#002800,#001a0a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neural Hack</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Signal Lost" data-yt="IRrj1IzNSVQ" data-bg="linear-gradient(135deg,#040010,#0c0028,#140034)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Signal Lost</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Zero Point" data-yt="PZtBZLQ8lGk" data-bg="linear-gradient(135deg,#020008,#080018,#0e0024)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Zero Point</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Matrix Feed" data-yt="XOO5CFZM8AI" data-bg="linear-gradient(135deg,#001200,#002200,#001800)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Matrix Feed</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Neural Grid" data-yt="mWzXg0mFQ9g" data-bg="linear-gradient(135deg,#060012,#12002a,#1a0036)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neural Grid</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Core Override" data-yt="N_E1kqR5kSA" data-bg="linear-gradient(135deg,#080020,#1a003a,#0a001a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Core Override</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Vaporwave Radio" data-yt="PXtu8s8uHB4" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e,#6e1a9a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Vaporwave Radio</div></div>
+        <div class="space-card" data-tag="calavera" data-name="A E S T H E T I C" data-yt="OGgsfnrk0Mc" data-bg="linear-gradient(135deg,#1a0030,#3a006a,#5a0080)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">A E S T H E T I C</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Mallsoft Radio" data-yt="FddlFe7-vYI" data-bg="linear-gradient(135deg,#0a0a2a,#2a0a4a,#3a0a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Mallsoft Radio</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Vapor City" data-yt="h59zvONrPtk" data-bg="linear-gradient(135deg,#200a3a,#3a1060,#501a70)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Vapor City</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Dream Protocol" data-yt="C-cnpxW5v00" data-bg="linear-gradient(135deg,#0d0028,#280050,#3a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dream Protocol</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Late Night Freq" data-yt="6VAfIFMCl6I" data-bg="linear-gradient(135deg,#18003a,#300060,#420080)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Late Night Freq</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Digital Highway" data-yt="YlH5caaGCrA" data-bg="linear-gradient(135deg,#0a0020,#20004a,#2a0055)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Digital Highway</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Neon Wave" data-yt="DrIeAXxVvj0" data-bg="linear-gradient(135deg,#150030,#2a0058,#3a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Wave</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Hologram Room" data-yt="0EqSXDwTq3s" data-bg="linear-gradient(135deg,#100028,#200048,#300060)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Hologram Room</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Cyber Drift" data-yt="t8DV3PnWvf8" data-bg="linear-gradient(135deg,#08001e,#18003c,#220048)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Drift</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Dark Techno" data-yt="yKkbFDRLFts" data-bg="linear-gradient(135deg,#080808,#141414,#0a0a12)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Techno</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Industrial Drive" data-yt="FVRYbVfmq-Y" data-bg="linear-gradient(135deg,#0e0808,#1a0a0a,#0a0a1a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Industrial Drive</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Deep Pulse" data-yt="FRhCfuznYE4" data-bg="linear-gradient(135deg,#04060a,#080e18,#040810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Pulse</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Sector 7" data-yt="lRhW0fP38II" data-bg="linear-gradient(135deg,#050508,#0d0d14,#080810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Sector 7</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Overclocked" data-yt="XeI8P_TCeIk" data-bg="linear-gradient(135deg,#060810,#0e1020,#080c18)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Overclocked</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Thermal Core" data-yt="eoZ0YnBpEqc" data-bg="linear-gradient(135deg,#0a0406,#180810,#100408)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Thermal Core</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Circuit Break" data-yt="kRkOCkItW-0" data-bg="linear-gradient(135deg,#060610,#101020,#080816)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Circuit Break</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Binary Storm" data-yt="7WnKPrHBiTg" data-bg="linear-gradient(135deg,#030310,#0a0a1e,#060612)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Binary Storm</div></div>
+        <div class="space-card" data-tag="calavera" data-name="EBM Assault" data-yt="-vH9ZvAySi8" data-bg="linear-gradient(135deg,#1a0000,#2a0808,#100000)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">EBM Assault</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Dark EBM" data-yt="edqlOxtnvL0" data-bg="linear-gradient(135deg,#100010,#200020,#0c000c)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark EBM</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Death Electric" data-yt="5zd6dwUOB7U" data-bg="linear-gradient(135deg,#050010,#0c001e,#050010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Death Electric</div></div>
+        <div class="space-card" data-tag="calavera" data-name="Electro Goth" data-yt="vAhrjtc-39I" data-bg="linear-gradient(135deg,#080010,#100020,#060010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electro Goth</div></div>
       </div>
-    </div>
-
-    <div class="sl-section">
-      <div class="section-title">🌧️ Lluvia</div>
-      <div class="spaces-grid">
-        <div class="space-card" data-tag="lluvia" data-name="Lluvia Tokyo" data-yt="mPZkdNFkNps" data-bg="linear-gradient(135deg,#2a3545,#1a2535)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lluvia Tokyo</div></div>
-        <div class="space-card" data-tag="lluvia" data-name="Rainy Lofi" data-yt="vYIYIVmOo3Q" data-bg="linear-gradient(135deg,#1e2d3a,#2e4555)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rainy Lofi</div></div>
-        <div class="space-card" data-tag="lluvia" data-name="Lighthouse Rain" data-yt="TBe-N9AU7zU" data-bg="linear-gradient(135deg,#1a2a4a,#2a4a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lighthouse Rain</div></div>
-        <div class="space-card" data-tag="lluvia" data-name="Rain 24H" data-yt="4ExjdcfWAzE" data-bg="linear-gradient(135deg,#152030,#253545)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Rain 24H</div></div>
-        <div class="space-card" data-tag="lluvia" data-name="Lluvia Suave 3H" data-yt="q76bMs-NwRk" data-bg="linear-gradient(135deg,#1e2d3a,#152030)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Lluvia Suave 3H</div></div>
-      </div>
-    </div>
-
-    <div class="sl-section">
-      <div class="section-title">🌿 Naturaleza</div>
-      <div class="spaces-grid">
-        <div class="space-card" data-tag="natura" data-name="Bosque & Jazz" data-yt="ZTLz_pTYhvo" data-bg="linear-gradient(135deg,#1a4d1a,#2e7d2e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Bosque & Jazz</div></div>
-        <div class="space-card" data-tag="natura" data-name="Jardín Primavera" data-yt="ca_U2756IP8" data-bg="linear-gradient(135deg,#2a5a1a,#4a8a2e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Jardín Primavera</div></div>
-        <div class="space-card" data-tag="natura" data-name="Naturaleza 24/7" data-yt="FwRSkjyPIZo" data-bg="linear-gradient(135deg,#134e5e,#71b280)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Naturaleza 24/7</div></div>
-        <div class="space-card" data-tag="natura" data-name="Sonidos del Bosque" data-yt="eKFTSSKCzWA" data-bg="linear-gradient(135deg,#1a4d1a,#3a6e3a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Sonidos del Bosque</div></div>
-      </div>
-    </div>
-
-    </div><!-- /#studySpaces -->
-
-    <!-- ══ CYBER SPACES ══ -->
-    <div id="cyberSpaces">
-      <div class="section-title">⚡ ENTORNOS</div>
-      <div class="pills">
-        <button class="pill active" onclick="filterSpaces(this,'todos')">◈</button>
-        <button class="pill" onclick="filterSpaces(this,'synth')">🎛</button>
-        <button class="pill" onclick="filterSpaces(this,'cyber')">⚡</button>
-        <button class="pill" onclick="filterSpaces(this,'vapor')">💜</button>
-        <button class="pill" onclick="filterSpaces(this,'techno')">🖤</button>
-        <button class="pill" onclick="filterSpaces(this,'glitch')">🔴</button>
-        <button class="pill" onclick="shuffleStream()" title="Aleatorio">🔀</button>
-      </div>
-      <div class="sl-section">
-        <div class="spaces-grid">
-          <div class="space-card" data-tag="cyber" data-name="Neo-Tokyo" data-bg="linear-gradient(135deg,#0a001f,#1a003a,#2a0050)" onclick="selectSpace(this)"><div class="space-thumb bg-neotokyo">🌆</div><div class="space-name">Neo-Tokyo</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Grid Runner" data-bg="linear-gradient(135deg,#000a18,#001a30,#00253a)" onclick="selectSpace(this)"><div class="space-thumb bg-gridrunner">▦</div><div class="space-name">Grid Runner</div></div>
-          <div class="space-card" data-tag="glitch" data-name="Void Deck" data-bg="linear-gradient(135deg,#050520,#0a0a40,#10105a)" onclick="selectSpace(this)"><div class="space-thumb bg-voiddeck">◉</div><div class="space-name">Void Deck</div></div>
-          <div class="space-card" data-tag="glitch" data-name="Neon Noir" data-bg="linear-gradient(135deg,#1a0005,#2a0018,#1a0030)" onclick="selectSpace(this)"><div class="space-thumb bg-neonnoir">🔴</div><div class="space-name">Neon Noir</div></div>
-          <div class="space-card" data-tag="techno" data-name="Digital Rain" data-bg="linear-gradient(135deg,#001800,#002a08,#000a00)" onclick="selectSpace(this)"><div class="space-thumb bg-digitalrain">⬇</div><div class="space-name">Digital Rain</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Vapor Dreams" data-bg="linear-gradient(135deg,#1a0a30,#3a1a70,#6a1a9a)" onclick="selectSpace(this)"><div class="space-thumb bg-vapordream">💜</div><div class="space-name">Vapor Dreams</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Blade Runner" data-bg="linear-gradient(135deg,#1a0a00,#3a1800,#2a0a1a)" onclick="selectSpace(this)"><div class="space-thumb bg-bladerunner">🌧</div><div class="space-name">Blade Runner</div></div>
-          <div class="space-card" data-tag="techno" data-name="Chrome Void" data-bg="linear-gradient(135deg,#0a0a20,#151530,#202040)" onclick="selectSpace(this)"><div class="space-thumb bg-chromevoid">⬡</div><div class="space-name">Chrome Void</div></div>
-        </div>
-      </div>
-      <div class="sl-section">
-        <div class="section-title">🎛 SYNTHWAVE / DARK SYNTH</div>
-        <div class="spaces-grid">
-          <div class="space-card" data-tag="synth" data-name="Cyber Grid" data-yt="pnVRrq06t2U" data-bg="linear-gradient(135deg,#0a0530,#1e0a60,#300a8a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Grid</div></div>
-          <div class="space-card" data-tag="synth" data-name="Dark Signal" data-yt="EflFUfrYJVE" data-bg="linear-gradient(135deg,#120030,#280060,#1a004a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Signal</div></div>
-          <div class="space-card" data-tag="synth" data-name="Outrun Drive" data-yt="zQ0MhOnVW4c" data-bg="linear-gradient(135deg,#0a0520,#2a0a5a,#4a0a6a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Outrun Drive</div></div>
-          <div class="space-card" data-tag="synth" data-name="Neon Horizon" data-yt="UedTcufyrHc" data-bg="linear-gradient(135deg,#1a0a30,#3a1060,#0a0a2a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Horizon</div></div>
-          <div class="space-card" data-tag="synth" data-name="Retro Override" data-yt="b3P_8GWq_i0" data-bg="linear-gradient(135deg,#0d0221,#1a0040,#2a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Retro Override</div></div>
-          <div class="space-card" data-tag="synth" data-name="Power Grid" data-yt="xFvFpFGpbPY" data-bg="linear-gradient(135deg,#000a2a,#001a4a,#00254a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Power Grid</div></div>
-          <div class="space-card" data-tag="synth" data-name="Dark Electro" data-yt="OQnHNzJdHrU" data-bg="linear-gradient(135deg,#0a0028,#1a0050,#2a0060)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Electro</div></div>
-          <div class="space-card" data-tag="synth" data-name="Synth Overdrive" data-yt="x9OBM1OAQOE" data-bg="linear-gradient(135deg,#14002a,#280052,#1a0040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Synth Overdrive</div></div>
-          <div class="space-card" data-tag="synth" data-name="Electric Pulse" data-yt="kLCeQqv5G4o" data-bg="linear-gradient(135deg,#080020,#180048,#200058)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electric Pulse</div></div>
-          <div class="space-card" data-tag="synth" data-name="Neon Signal" data-yt="jzEN2VIE9Fo" data-bg="linear-gradient(135deg,#0a001e,#1e0048,#2a005a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Signal</div></div>
-        </div>
-      </div>
-      <div class="sl-section">
-        <div class="section-title">⚡ CYBERPUNK / DARK WAVE</div>
-        <div class="spaces-grid">
-          <div class="space-card" data-tag="cyber" data-name="Dark Electro" data-yt="34H1XIjnfKM" data-bg="linear-gradient(135deg,#050010,#0f0030,#18004a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Electro</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Neon Underground" data-yt="AswR2woOGj0" data-bg="linear-gradient(135deg,#080018,#160030,#200040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Underground</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Void Protocol" data-yt="TuOHPaR0bDI" data-bg="linear-gradient(135deg,#050014,#0d002c,#160040)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Void Protocol</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Blackout" data-yt="wpVBjOvmrZU" data-bg="linear-gradient(135deg,#060010,#10002a,#180038)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Blackout</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Neural Hack" data-yt="V_aFPWqMwho" data-bg="linear-gradient(135deg,#001400,#002800,#001a0a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neural Hack</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Signal Lost" data-yt="IRrj1IzNSVQ" data-bg="linear-gradient(135deg,#040010,#0c0028,#140034)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Signal Lost</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Zero Point" data-yt="PZtBZLQ8lGk" data-bg="linear-gradient(135deg,#020008,#080018,#0e0024)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Zero Point</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Matrix Feed" data-yt="XOO5CFZM8AI" data-bg="linear-gradient(135deg,#001200,#002200,#001800)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Matrix Feed</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Neural Grid" data-yt="mWzXg0mFQ9g" data-bg="linear-gradient(135deg,#060012,#12002a,#1a0036)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neural Grid</div></div>
-          <div class="space-card" data-tag="cyber" data-name="Core Override" data-yt="N_E1kqR5kSA" data-bg="linear-gradient(135deg,#080020,#1a003a,#0a001a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Core Override</div></div>
-        </div>
-      </div>
-      <div class="sl-section">
-        <div class="section-title">💜 VAPORWAVE / A E S T H E T I C</div>
-        <div class="spaces-grid">
-          <div class="space-card" data-tag="vapor" data-name="Vaporwave Radio" data-yt="PXtu8s8uHB4" data-bg="linear-gradient(135deg,#1a0a2e,#4a1a6e,#6e1a9a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Vaporwave Radio</div></div>
-          <div class="space-card" data-tag="vapor" data-name="A E S T H E T I C" data-yt="OGgsfnrk0Mc" data-bg="linear-gradient(135deg,#1a0030,#3a006a,#5a0080)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">A E S T H E T I C</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Mallsoft Radio" data-yt="FddlFe7-vYI" data-bg="linear-gradient(135deg,#0a0a2a,#2a0a4a,#3a0a5a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Mallsoft Radio</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Vapor City" data-yt="h59zvONrPtk" data-bg="linear-gradient(135deg,#200a3a,#3a1060,#501a70)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Vapor City</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Dream Protocol" data-yt="C-cnpxW5v00" data-bg="linear-gradient(135deg,#0d0028,#280050,#3a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dream Protocol</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Late Night Freq" data-yt="6VAfIFMCl6I" data-bg="linear-gradient(135deg,#18003a,#300060,#420080)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Late Night Freq</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Digital Highway" data-yt="YlH5caaGCrA" data-bg="linear-gradient(135deg,#0a0020,#20004a,#2a0055)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Digital Highway</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Neon Wave" data-yt="DrIeAXxVvj0" data-bg="linear-gradient(135deg,#150030,#2a0058,#3a006a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neon Wave</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Hologram Room" data-yt="0EqSXDwTq3s" data-bg="linear-gradient(135deg,#100028,#200048,#300060)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Hologram Room</div></div>
-          <div class="space-card" data-tag="vapor" data-name="Cyber Drift" data-yt="t8DV3PnWvf8" data-bg="linear-gradient(135deg,#08001e,#18003c,#220048)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Drift</div></div>
-        </div>
-      </div>
-      <div class="sl-section">
-        <div class="section-title">🖤 DARK TECHNO / INDUSTRIAL / EBM</div>
-        <div class="spaces-grid">
-          <div class="space-card" data-tag="techno" data-name="Dark Techno" data-yt="yKkbFDRLFts" data-bg="linear-gradient(135deg,#080808,#141414,#0a0a12)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark Techno</div></div>
-          <div class="space-card" data-tag="techno" data-name="Industrial Drive" data-yt="FVRYbVfmq-Y" data-bg="linear-gradient(135deg,#0e0808,#1a0a0a,#0a0a1a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Industrial Drive</div></div>
-          <div class="space-card" data-tag="techno" data-name="Deep Pulse" data-yt="FRhCfuznYE4" data-bg="linear-gradient(135deg,#04060a,#080e18,#040810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Deep Pulse</div></div>
-          <div class="space-card" data-tag="techno" data-name="Sector 7" data-yt="lRhW0fP38II" data-bg="linear-gradient(135deg,#050508,#0d0d14,#080810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Sector 7</div></div>
-          <div class="space-card" data-tag="techno" data-name="Overclocked" data-yt="XeI8P_TCeIk" data-bg="linear-gradient(135deg,#060810,#0e1020,#080c18)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Overclocked</div></div>
-          <div class="space-card" data-tag="techno" data-name="Thermal Core" data-yt="eoZ0YnBpEqc" data-bg="linear-gradient(135deg,#0a0406,#180810,#100408)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Thermal Core</div></div>
-          <div class="space-card" data-tag="techno" data-name="Circuit Break" data-yt="kRkOCkItW-0" data-bg="linear-gradient(135deg,#060610,#101020,#080816)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Circuit Break</div></div>
-          <div class="space-card" data-tag="techno" data-name="Binary Storm" data-yt="7WnKPrHBiTg" data-bg="linear-gradient(135deg,#030310,#0a0a1e,#060612)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Binary Storm</div></div>
-          <div class="space-card" data-tag="techno" data-name="Glitch Core" data-yt="gzfn2PqHNqk" data-bg="linear-gradient(135deg,#0a040c,#180a22,#0e0618)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Glitch Core</div></div>
-          <div class="space-card" data-tag="techno" data-name="Machine Pulse" data-yt="EXEtX8Pf_bM" data-bg="linear-gradient(135deg,#050508,#0f0f18,#080810)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Machine Pulse</div></div>
-        </div>
-      </div>
-      <div class="sl-section">
-        <div class="section-title">🔴 EBM / ELECTRO INDUSTRIAL</div>
-        <div class="spaces-grid">
-          <div class="space-card" data-tag="techno" data-name="EBM Assault" data-yt="-vH9ZvAySi8" data-bg="linear-gradient(135deg,#1a0000,#2a0808,#100000)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">EBM Assault</div></div>
-          <div class="space-card" data-tag="techno" data-name="Electro Body" data-yt="i3sD9iUSiaU" data-bg="linear-gradient(135deg,#120004,#220008,#0e0002)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electro Body</div></div>
-          <div class="space-card" data-tag="techno" data-name="Industrial Force" data-yt="G-u5OhIeln4" data-bg="linear-gradient(135deg,#0a0a00,#1a1a00,#080800)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Industrial Force</div></div>
-          <div class="space-card" data-tag="techno" data-name="Dark EBM" data-yt="edqlOxtnvL0" data-bg="linear-gradient(135deg,#100010,#200020,#0c000c)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Dark EBM</div></div>
-          <div class="space-card" data-tag="techno" data-name="Cyber Body" data-yt="YgU261Zlkco" data-bg="linear-gradient(135deg,#0a0008,#180012,#08000a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Cyber Body</div></div>
-          <div class="space-card" data-tag="techno" data-name="Aggro Tech" data-yt="R6jcc5asp9k" data-bg="linear-gradient(135deg,#140000,#240808,#100202)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Aggro Tech</div></div>
-          <div class="space-card" data-tag="techno" data-name="Death Electric" data-yt="5zd6dwUOB7U" data-bg="linear-gradient(135deg,#050010,#0c001e,#050010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Death Electric</div></div>
-          <div class="space-card" data-tag="techno" data-name="Futurepop" data-yt="eWssZXvN7Mw" data-bg="linear-gradient(135deg,#000a14,#001428,#00080e)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Futurepop</div></div>
-          <div class="space-card" data-tag="techno" data-name="Neo Industrial" data-yt="H53i70yljbw" data-bg="linear-gradient(135deg,#0a0600,#180e00,#080400)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Neo Industrial</div></div>
-          <div class="space-card" data-tag="techno" data-name="Harsh Noise" data-yt="AijCmiLi544" data-bg="linear-gradient(135deg,#100008,#1e0012,#0c0006)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Harsh Noise</div></div>
-          <div class="space-card" data-tag="techno" data-name="Electro Goth" data-yt="vAhrjtc-39I" data-bg="linear-gradient(135deg,#080010,#100020,#060010)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Electro Goth</div></div>
-          <div class="space-card" data-tag="techno" data-name="Power Noise" data-yt="xb-uiTo7ES8" data-bg="linear-gradient(135deg,#06000a,#0e0016,#06000a)" onclick="selectSpace(this)"><div class="space-thumb"></div><div class="space-name">Power Noise</div></div>
-        </div>
-      </div>
-    </div><!-- /#cyberSpaces -->
 
     <div class="section-title">🔗 URL personalizada</div>
     <p class="yt-hint">Pega cualquier enlace de YouTube y se usará como fondo de tu espacio.</p>
@@ -1358,14 +1574,28 @@ body.cyber #cyberSpaces{display:block;}
     <div class="particle" style="width:5px;height:5px;left:67%;animation-duration:11s;animation-delay:5.5s"></div>
     <div class="particle" style="width:2px;height:2px;left:33%;animation-duration:20s;animation-delay:1s"></div>
     <div class="particle" style="width:4px;height:4px;left:82%;animation-duration:14s;animation-delay:4s"></div>
-    <div class="space-chip" id="spaceChip">☕ Café Tranquilo</div>
-    <div class="yt-vol-ctrl" id="ytVolCtrl">
-      <button class="yt-ctrl-btn" id="ytPlayBtn" onclick="toggleYTPause()" title="Play / Pausa">⏸</button>
-      <div class="yt-seek-row">
-        <button class="yt-seek-btn" onclick="seekYT(-15)" title="Retroceder 15s">−15</button>
-        <button class="yt-seek-btn" onclick="seekYT(15)"  title="Avanzar 15s">+15</button>
+    <div class="space-bottom-row">
+      <div class="space-chip" id="spaceChip">☕ Café Tranquilo</div>
+      <div class="yt-attribution" id="ytAttribution">
+        <span>Gracias a <span id="ytChannelName"></span></span>
+        <a class="yt-attr-btn" id="ytChannelLink" href="#" target="_blank" rel="noopener noreferrer">Seguir ↗</a>
       </div>
-      <div class="yt-ctrl-divider"></div>
+    </div>
+    <div class="yt-bottom-bar" id="ytBottomBar">
+      <div class="yt-progress-wrap" id="ytProgressWrap">
+        <div class="yt-progress-track" id="ytProgressTrack">
+          <div class="yt-progress-fill" id="ytProgressFill"></div>
+          <div class="yt-progress-thumb" id="ytProgressThumb"></div>
+        </div>
+        <div class="yt-progress-time"><span id="ytTimeElapsed">0:00</span><span id="ytTimeDuration">0:00</span></div>
+      </div>
+      <div class="yt-bottom-controls">
+        <button class="yt-bottom-btn" onclick="seekYT(-15)" title="Retroceder 15s">−15</button>
+        <button class="yt-bottom-btn play-btn" id="ytPlayBtn" onclick="toggleYTPause()" title="Play / Pausa">⏸</button>
+        <button class="yt-bottom-btn" onclick="seekYT(15)" title="Avanzar 15s">+15</button>
+      </div>
+    </div>
+    <div class="yt-vol-ctrl" id="ytVolCtrl">
       <button class="yt-vol-btn" id="ytMuteBtn" onclick="toggleYTMute()" title="Silenciar / activar">🔊</button>
       <input class="yt-vol-slider" id="ytVolSlider" type="range" min="0" max="100" value="80" oninput="setYTVolume(this.value)">
     </div>
@@ -1778,6 +2008,64 @@ body.cyber #cyberSpaces{display:block;}
 
 
 <!-- ═══════════════════════════════════════════════
+     VISTA — Acerca de
+═══════════════════════════════════════════════ -->
+<div class="view" id="vAcerca">
+  <div class="about-wrap">
+
+    <div class="about-hero">
+      <div class="about-hero-icon">🌿</div>
+      <h1>Rincón de Estudio</h1>
+      <p>Un espacio pensado para ti</p>
+    </div>
+
+    <div class="about-card">
+      <h2>💚 ¿Para quién es esto?</h2>
+      <div class="about-free-badge">✓ Completamente gratuito, siempre</div>
+      <p>
+        Rincón de Estudio nació pensando en estudiantes que, como muchos de nosotros,
+        no siempre tienen acceso a suscripciones de pago para apps de productividad,
+        música o ambientes de estudio.
+      </p>
+      <p>
+        Entendemos que el presupuesto es limitado y que eso no debería ser un obstáculo
+        para estudiar con enfoque, con calma y con motivación.
+      </p>
+    </div>
+
+    <div class="about-card">
+      <h2>🎯 ¿Qué ofrece?</h2>
+      <ul>
+        <li data-icon="🎵">Ambientes sonoros con streams de música lo-fi y café para concentrarte sin distracciones.</li>
+        <li data-icon="📚">Gestión de asignaturas y tareas para estructurar tu carga académica.</li>
+        <li data-icon="⏱️">Temporizador Pomodoro para organizar tus sesiones de estudio.</li>
+        <li data-icon="📅">Calendario integrado para no perder de vista entregas y pruebas.</li>
+        <li data-icon="🔗">Reproductor personalizado para usar cualquier video de YouTube como fondo.</li>
+      </ul>
+    </div>
+
+    <div class="about-card">
+      <h2>🤝 Filosofía</h2>
+      <p>
+        Creemos que el acceso a herramientas que hacen el estudio más ameno
+        no debería depender de cuánto dinero tengas. Por eso esta app es libre,
+        sin anuncios, sin muros de pago, sin trampa.
+      </p>
+      <p>
+        Si te ayuda a estudiar mejor, a mantenerte motivado o simplemente a que
+        el tiempo en los libros se sienta un poco más llevadero, cumplió su propósito.
+      </p>
+    </div>
+
+    <div class="about-signature">
+      atte: FrankiZun
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
      MODAL — Nueva Asignatura
 ═══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="subjModal" onclick="if(event.target===this)closeModal()">
@@ -1887,6 +2175,10 @@ let _ytTime = 0;
 let _ytTicker = null;
 let ytCurrentId = null;
 let ytHealthTimer = null;
+let ytIsCustom = false;
+let _ytDuration = 0;
+let _ytScrubbing = false;
+const _ytChannelCache = {};
 
 // ─── Helpers de estado de stream ─────────────────────────────
 function markOffline(card) {
@@ -1978,9 +2270,14 @@ function shuffleStream() {
 }
 
 async function probeAllStreams() {
-  const cards = [...document.querySelectorAll('.space-card[data-yt]')];
+  const cards = [...document.querySelectorAll('.space-card[data-yt]:not([data-vod])')];
+  window._probeState = { done: 0, total: cards.length, onProgress: null };
   let idx = 0;
-  const worker = async () => { while (idx < cards.length) await probeStream(cards[idx++]); };
+  const tick = () => {
+    window._probeState.done++;
+    window._probeState.onProgress?.(window._probeState.done, window._probeState.total);
+  };
+  const worker = async () => { while (idx < cards.length) { await probeStream(cards[idx++]); tick(); } };
   await Promise.all(Array.from({length: 6}, worker));
   updateSectionVisibility();
   shuffleStream();
@@ -2024,7 +2321,8 @@ window.addEventListener('message', e => {
     if (state !== null) {
       if (state === 1) {
         ytPlaying = true;
-        if (!_ytTicker) _ytTicker = setInterval(() => { _ytTime++; }, 1000);
+        if (!_ytTicker) _ytTicker = setInterval(() => { _ytTime++; updateYTProgress(); }, 1000);
+        sendYTCmd('getDuration', []);
       } else {
         ytPlaying = false;
         clearInterval(_ytTicker); _ytTicker = null;
@@ -2034,6 +2332,11 @@ window.addEventListener('message', e => {
     }
     if (msg.event === 'infoDelivery' && msg.info?.currentTime !== undefined) {
       _ytTime = Math.floor(msg.info.currentTime);
+      updateYTProgress();
+    }
+    if (msg.event === 'infoDelivery' && msg.info?.duration !== undefined && msg.info.duration > 0) {
+      _ytDuration = msg.info.duration;
+      updateYTProgress();
     }
   } catch {}
 });
@@ -2049,14 +2352,20 @@ function sendYTCmd(func, args = []) {
   frame.contentWindow.postMessage(JSON.stringify({event:'command', func, args}), '*');
 }
 
-function buildYTSrc(videoId) {
-  return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+function buildYTSrc(videoId, isCustom = false) {
+  const base = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+  return isCustom
+    ? base + `&loop=1&playlist=${videoId}&modestbranding=1&rel=0`
+    : base + `&modestbranding=1&rel=0`;
 }
 
-function loadYT(videoId, name) {
+function loadYT(videoId, name, isCustom = false) {
   const frame = document.getElementById('ytFrame');
   const bg    = document.getElementById('spaceBg');
   ytCurrentId = videoId;
+  ytIsCustom = isCustom;
+  _ytDuration = 0;
+  _ytTime = 0;
   ytMuted = false;
   ytNeedsUnmute = true;
   const btn  = document.getElementById('ytMuteBtn');
@@ -2066,6 +2375,10 @@ function loadYT(videoId, name) {
   ctrl.classList.add('visible');
   ctrl.style.left = slCollapsed ? '0px' : '320px';
   ctrl.classList.toggle('sl-hidden', slCollapsed);
+  const bb = document.getElementById('ytBottomBar');
+  bb.classList.add('visible');
+  bb.classList.toggle('custom', isCustom);
+  updateYTProgress();
   document.getElementById('ytVolSlider').value = ytVolume;
   frame.classList.remove('loaded');
   clearTimeout(ytHealthTimer);
@@ -2074,7 +2387,7 @@ function loadYT(videoId, name) {
     if (c && c.dataset.yt === videoId) markOffline(c);
   }, 12000);
   setTimeout(() => {
-    frame.src = buildYTSrc(videoId);
+    frame.src = buildYTSrc(videoId, isCustom);
     frame.onload = () => {
       frame.classList.add('loaded');
       try { frame.contentWindow.postMessage(JSON.stringify({event:'listening',id:1}), '*'); } catch {}
@@ -2110,10 +2423,15 @@ function setYTVolume(val) {
 }
 
 function toggleYTPause() {
+  ytPlaying = !ytPlaying;
+  const pb = document.getElementById('ytPlayBtn');
+  if (pb) pb.textContent = ytPlaying ? '⏸' : '▶';
   if (ytPlaying) {
-    sendYTCmd('pauseVideo');
-  } else {
     sendYTCmd('playVideo');
+    if (!_ytTicker) _ytTicker = setInterval(() => { _ytTime++; updateYTProgress(); }, 1000);
+  } else {
+    sendYTCmd('pauseVideo');
+    clearInterval(_ytTicker); _ytTicker = null;
   }
 }
 
@@ -2122,6 +2440,90 @@ function seekYT(delta) {
   const target = Math.max(0, _ytTime + delta);
   sendYTCmd('seekTo', [target, true]);
   _ytTime = target;
+  updateYTProgress();
+}
+
+function fmtTime(s) {
+  s = Math.max(0, Math.floor(s));
+  if (s > 86400) return '–:––';
+  const h   = Math.floor(s / 3600);
+  const m   = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+function updateYTProgress() {
+  const fill  = document.getElementById('ytProgressFill');
+  const thumb = document.getElementById('ytProgressThumb');
+  const telap = document.getElementById('ytTimeElapsed');
+  const tdur  = document.getElementById('ytTimeDuration');
+  if (!fill) return;
+  const pct = _ytDuration > 0 ? Math.min(100, (_ytTime / _ytDuration) * 100) : 0;
+  fill.style.width = pct + '%';
+  if (thumb) thumb.style.left = pct + '%';
+  if (telap) telap.textContent = fmtTime(_ytTime);
+  if (tdur)  tdur.textContent  = _ytDuration > 0 ? fmtTime(_ytDuration) : '–:––';
+}
+
+function _doProgressSeek(e) {
+  if (!ytIsCustom || !_ytDuration) return;
+  const track = document.getElementById('ytProgressTrack');
+  if (!track) return;
+  const rect = track.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const target = ratio * _ytDuration;
+  sendYTCmd('seekTo', [target, true]);
+  _ytTime = Math.floor(target);
+  updateYTProgress();
+}
+
+document.getElementById('ytProgressTrack').addEventListener('mousedown', e => {
+  if (!ytIsCustom || !_ytDuration) return;
+  _ytScrubbing = true;
+  document.getElementById('ytBottomBar').classList.add('scrubbing');
+  _doProgressSeek(e);
+});
+
+document.addEventListener('mousemove', e => {
+  if (!_ytScrubbing) return;
+  _doProgressSeek(e);
+});
+
+document.addEventListener('mouseup', () => {
+  if (!_ytScrubbing) return;
+  _ytScrubbing = false;
+  const bb = document.getElementById('ytBottomBar');
+  if (bb) bb.classList.remove('scrubbing');
+});
+
+async function showYTAttribution(videoId) {
+  const el  = document.getElementById('ytAttribution');
+  if (!el) return;
+  el.classList.remove('shown');
+  let info = _ytChannelCache[videoId];
+  if (!info) {
+    try {
+      const res  = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      if (res.ok) {
+        const d = await res.json();
+        info = { name: d.author_name, url: d.author_url };
+        _ytChannelCache[videoId] = info;
+      }
+    } catch {}
+  }
+  if (!info?.name) { hideYTAttribution(); return; }
+  document.getElementById('ytChannelName').textContent = info.name;
+  const link = document.getElementById('ytChannelLink');
+  link.href = info.url || '#';
+  el.classList.add('visible');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('shown')));
+}
+
+function hideYTAttribution() {
+  const el = document.getElementById('ytAttribution');
+  if (!el) return;
+  el.classList.remove('visible','shown');
 }
 
 function clearYT() {
@@ -2130,9 +2532,16 @@ function clearYT() {
   frame.src = '';
   ytCurrentId = null;
   ytNeedsUnmute = false;
+  ytIsCustom = false;
+  _ytDuration = 0;
+  _ytTime = 0;
   const ctrl = document.getElementById('ytVolCtrl');
   ctrl.classList.remove('visible');
   ctrl.classList.remove('sl-hidden');
+  const bb = document.getElementById('ytBottomBar');
+  bb.classList.remove('visible');
+  bb.classList.remove('custom');
+  hideYTAttribution();
 }
 
 function selectSpace(card) {
@@ -2140,11 +2549,12 @@ function selectSpace(card) {
   card.classList.add('active');
   const ytId = card.dataset.yt;
   if (ytId) {
-    loadYT(ytId, card.dataset.name);
+    loadYT(ytId, card.dataset.name, card.dataset.vod === '1');
+    showYTAttribution(ytId);
   } else {
     clearYT();
     document.getElementById('spaceBg').style.background = card.dataset.bg;
-    const emoji = card.querySelector('.space-thumb').childNodes[0].textContent.trim();
+    const emoji = card.querySelector('.space-thumb').childNodes[0]?.textContent.trim() || '';
     document.getElementById('spaceChip').textContent = emoji + ' ' + card.dataset.name;
   }
 }
@@ -2157,7 +2567,8 @@ function loadCustomYT() {
   if (!id) { alert('No se encontró un video válido en esa URL.\nEjemplo: https://youtube.com/watch?v=jfKfPfyJRdk'); return; }
   // deselect all cards, create a virtual "custom" card
   document.querySelectorAll('.space-card').forEach(c => c.classList.remove('active'));
-  loadYT(id, 'Mi espacio personalizado');
+  hideYTAttribution();
+  loadYT(id, 'Mi espacio personalizado', true);
 }
 
 const FS_ENTER = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4"/></svg>`;
@@ -2891,6 +3302,12 @@ function loadPostits() {
     data.forEach(d => {
       const note = _createFPNote(d.text, d.color, d.rot, d.x, d.y);
       container.appendChild(note);
+      // Clamp al cargar: nunca sobrepasar los banners laterales ni el topbar
+      requestAnimationFrame(() => {
+        const b = getDragBounds(note.offsetWidth, note.offsetHeight);
+        note.style.left = Math.max(b.minX, Math.min(b.maxX, parseFloat(note.style.left))) + 'px';
+        note.style.top  = Math.max(b.minY, Math.min(b.maxY, parseFloat(note.style.top)))  + 'px';
+      });
     });
   } catch(e) {}
 }
@@ -3336,29 +3753,7 @@ function _stopCyberAnim() {
   if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
 }
 
-/* ── Modo Cyber ── */
-function toggleCyberMode() {
-  const isCyber = document.body.classList.toggle('cyber');
-  localStorage.setItem('rincon_mode', isCyber ? 'cyber' : 'study');
-  _applyModeUI(isCyber);
-  if (isCyber) _startCyberAnim(); else _stopCyberAnim();
-}
-
-function _applyModeUI(isCyber) {
-  document.getElementById('appLogoSub').textContent = isCyber ? 'de Trabajo' : 'de Estudio';
-  document.getElementById('appLogo').firstChild.textContent = isCyber ? '⚡ Rincón ' : '🌿 Rincón ';
-  document.getElementById('msLabel').textContent = isCyber ? 'TRABAJO' : 'ESTUDIO';
-  document.getElementById('modeSwitch').title = isCyber ? 'Volver a Modo Estudio' : 'Cambiar a Modo Trabajo';
-  document.title = isCyber ? 'Rincón de Trabajo' : 'Rincón de Estudio';
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  // Restaurar modo guardado
-  if (localStorage.getItem('rincon_mode') === 'cyber') {
-    document.body.classList.add('cyber');
-    _applyModeUI(true);
-    setTimeout(_startCyberAnim, 300);
-  }
   // Inicializar módulos flotantes
   document.querySelectorAll('.module').forEach(m => { makeDraggable(m); initModuleParticles(m); });
   // Posición inicial junto al sidebar derecho, bajo la barra
@@ -3375,33 +3770,177 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTasks();
   probeAllStreams();
   setInterval(reProbeOffline, 5 * 60 * 1000);
-  document.querySelectorAll('.space-card[data-yt]').forEach(card => {
+  // ── Thumbnails lazy (IntersectionObserver) + indicadores de estado ──
+  const _applyThumb = (thumb, url) => {
+    thumb.style.background         = '';
+    thumb.style.backgroundImage    = `url('${url}')`;
+    thumb.style.backgroundSize     = 'cover';
+    thumb.style.backgroundPosition = 'center';
+  };
+  const _tryThumb = (thumb, urls) => {
+    if (!urls.length) return;
+    const img = new Image();
+    img.onload  = () => img.naturalWidth <= 120 ? _tryThumb(thumb, urls.slice(1)) : _applyThumb(thumb, img.src);
+    img.onerror = () => _tryThumb(thumb, urls.slice(1));
+    img.src = urls[0];
+  };
+  const _loadThumb = card => {
     const id    = card.dataset.yt;
     const thumb = card.querySelector('.space-thumb');
+    _tryThumb(thumb, [
+      `https://img.youtube.com/vi/${id}/maxresdefault.jpg`,
+      `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+      `https://img.youtube.com/vi/${id}/mqdefault.jpg`,
+      `https://img.youtube.com/vi/${id}/sddefault.jpg`,
+    ]);
+  };
 
-    // eliminar emojis (nodos de texto) y badge YT
+  const _thumbObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      _thumbObserver.unobserve(e.target);
+      _loadThumb(e.target);
+    });
+  }, { rootMargin: '200px' });
+
+  document.querySelectorAll('.space-card[data-yt]').forEach(card => {
+    const thumb = card.querySelector('.space-thumb');
+
+    // limpiar nodos de texto y badge
     [...thumb.childNodes].forEach(n => { if (n.nodeType === 3) n.remove(); });
     const badge = thumb.querySelector('.yt-badge');
     if (badge) badge.remove();
 
-    // thumbnail: maxresdefault → hqdefault como fallback
-    const applyThumb = url => {
-      thumb.style.background         = '';
-      thumb.style.backgroundImage    = `url('${url}')`;
-      thumb.style.backgroundSize     = 'cover';
-      thumb.style.backgroundPosition = 'center';
-    };
-    const imgHD = new Image();
-    imgHD.onload  = () => applyThumb(`https://img.youtube.com/vi/${id}/maxresdefault.jpg`);
-    imgHD.onerror = () => applyThumb(`https://img.youtube.com/vi/${id}/hqdefault.jpg`);
-    imgHD.src = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+    // indicador de estado solo en streams en vivo
+    if (!card.dataset.vod) {
+      const ind = document.createElement('div');
+      ind.className = 'stream-indicator';
+      ind.innerHTML = '<span class="stream-dot"></span>';
+      card.appendChild(ind);
+    }
 
-    // inyectar indicador de estado
-    const ind = document.createElement('div');
-    ind.className = 'stream-indicator';
-    ind.innerHTML = '<span class="stream-dot"></span>';
-    card.appendChild(ind);
+    // registrar para carga lazy
+    _thumbObserver.observe(card);
   });
+
+  // ── Splash screen ──
+  (function(){
+    const splash     = document.getElementById('splash');
+    const fill       = document.getElementById('splashFill');
+    const bienvenido = document.getElementById('splashBienvenido');
+    const nameForm   = document.getElementById('splashNameForm');
+    const nameInput  = document.getElementById('splashNameInput');
+
+    const _studyEmojis = ['🦉','💡','📚','✏️','✅','📝','🕐','📖','🔬','📐','🎓','🧠','⏰','🖊️','🗂️','⭐','🔭','📊','🧮','📌'];
+    let _emojiIv = null, _emojiWrap = null;
+
+    function startEmojiRain() {
+      _emojiWrap = document.createElement('div');
+      _emojiWrap.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:hidden;';
+      document.body.appendChild(_emojiWrap);
+      _emojiIv = setInterval(() => {
+        const el  = document.createElement('span');
+        const dur = 2.2 + Math.random() * 1.8;
+        const dly = Math.random() * .4;
+        el.textContent = _studyEmojis[Math.floor(Math.random() * _studyEmojis.length)];
+        let x, y;
+        do { x = Math.random() * 100; y = Math.random() * 100; }
+        while (x > 22 && x < 78 && y > 25 && y < 75);
+        el.style.cssText = `position:absolute;left:${x}%;top:${y}%;font-size:${22+Math.random()*16}px;opacity:0;filter:grayscale(1);animation:emoji-drift ${dur}s ${dly}s ease-in-out forwards;`;
+        _emojiWrap.appendChild(el);
+        setTimeout(() => el.remove(), (dur + dly + .15) * 1000);
+      }, 280);
+    }
+
+    function stopEmojiRain() {
+      clearInterval(_emojiIv); _emojiIv = null;
+      if (_emojiWrap) {
+        _emojiWrap.style.transition = 'opacity .9s';
+        _emojiWrap.style.opacity = '0';
+        setTimeout(() => { _emojiWrap?.remove(); _emojiWrap = null; }, 1000);
+      }
+    }
+
+    function revealText(el, text, onDone) {
+      el.innerHTML = '';
+      const stagger = 95;
+      [...text].forEach((ch, i) => {
+        const span = document.createElement('span');
+        span.className = 'cl';
+        span.textContent = ch === ' ' ? ' ' : ch;
+        span.style.animationDelay = (i * stagger) + 'ms';
+        el.appendChild(span);
+      });
+      setTimeout(onDone, (text.length - 1) * stagger + 1800);
+    }
+
+    let _textDone = false;
+    let _streamsDone = false;
+
+    function setFill(pct) {
+      fill.style.transition = 'width .4s ease';
+      fill.style.width = Math.min(100, Math.max(0, pct)) + '%';
+    }
+
+    function dismissSplash() {
+      stopEmojiRain();
+      setFill(100);
+      setTimeout(() => {
+        splash.classList.add('out');
+        setTimeout(() => splash.remove(), 820);
+      }, 450);
+    }
+
+    function tryDismiss() {
+      if (_textDone && _streamsDone) dismissSplash();
+    }
+
+    // Conectar progreso real de probes a la barra
+    if (!window._probeState) window._probeState = { done: 0, total: 1, onProgress: null };
+    window._probeState.onProgress = (done, total) => {
+      setFill((done / total) * 95);
+      if (done >= total) { _streamsDone = true; tryDismiss(); }
+    };
+    // Por si los probes ya terminaron antes de que corriera el splash
+    if (window._probeState.done >= window._probeState.total && window._probeState.total > 0) {
+      _streamsDone = true;
+      setFill(95);
+    }
+
+    const savedName = localStorage.getItem('rincon_user_name');
+    if (savedName) {
+      setTimeout(() => {
+        startEmojiRain();
+        revealText(bienvenido, 'Bienvenido, ' + savedName, () => {
+          _textDone = true;
+          setTimeout(() => { _streamsDone = true; tryDismiss(); }, 3000);
+          tryDismiss();
+        });
+      }, 1700);
+    } else {
+      setTimeout(() => {
+        nameForm.classList.remove('hidden');
+        nameInput.focus();
+      }, 1700);
+    }
+
+    window.submitSplashName = function() {
+      const name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      localStorage.setItem('rincon_user_name', name);
+      nameForm.classList.add('hidden');
+      startEmojiRain();
+      revealText(bienvenido, 'Bienvenido, ' + name, () => {
+        _textDone = true;
+        setTimeout(() => { _streamsDone = true; tryDismiss(); }, 3000);
+        tryDismiss();
+      });
+    };
+
+    nameInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') window.submitSplashName();
+    });
+  })();
 
   // ── Modo Cinema: doble clic en el área de video ──
   document.getElementById('vFocus').addEventListener('dblclick', e => {
