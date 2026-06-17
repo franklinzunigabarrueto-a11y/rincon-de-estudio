@@ -507,6 +507,13 @@ body.cyber .yt-attr-btn:hover{background:rgba(0,220,255,.22);}
 }
 .module.hidden{display:none;}
 .module.dragging{cursor:grabbing !important;box-shadow:0 14px 40px rgba(0,0,0,.18);}
+@keyframes bubble-pop{
+  0%  {transform:scale(1);    opacity:1;  filter:blur(0);}
+  22% {transform:scale(1.12); opacity:1;  filter:blur(0);}
+  55% {transform:scale(1.06); opacity:.7; filter:blur(1px);}
+  100%{transform:scale(0);    opacity:0;  filter:blur(5px);}
+}
+.module.popping{animation:bubble-pop .28s cubic-bezier(.4,0,.6,1) forwards;pointer-events:none;}
 .mod-particle-canvas{
   position:absolute;left:-20px;top:-20px;
   pointer-events:none;z-index:99;opacity:0;
@@ -2800,11 +2807,20 @@ function restoreBanner(dir) {
 function toggleModule(key) {
   const mod = document.getElementById('mod-' + key);
   const btn = document.getElementById('ml-'  + key);
-  const nowHidden = mod.classList.toggle('hidden');
-  btn?.classList.toggle('on', !nowHidden);
-  if (!nowHidden) {
-    document.querySelectorAll('.module').forEach(m => m.style.zIndex = 16);
-    mod.style.zIndex = 17;
+  if (!mod.classList.contains('hidden') && !mod.classList.contains('popping')) {
+    // Cerrar: animar como burbuja y luego ocultar
+    btn?.classList.remove('on');
+    mod.classList.add('popping');
+    setTimeout(() => {
+      mod.classList.remove('popping');
+      mod.classList.add('hidden');
+    }, 280);
+  } else if (mod.classList.contains('hidden')) {
+    // Abrir
+    mod.classList.remove('hidden');
+    btn?.classList.add('on');
+    document.querySelectorAll('.module').forEach(m => m.style.zIndex = 200);
+    mod.style.zIndex = 201;
   }
 }
 
