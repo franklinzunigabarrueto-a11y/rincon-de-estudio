@@ -1029,6 +1029,13 @@ body.cyber .about-free-badge{background:rgba(0,220,255,.08);border-color:rgba(0,
   from{transform:rotate(var(--rot)) scale(.88);opacity:.7;}
   to  {transform:rotate(var(--rot)) scale(1);opacity:1;}
 }
+@keyframes fp-pop{
+  0%  {transform:rotate(var(--rot)) scale(1);   opacity:1; filter:blur(0);}
+  22% {transform:rotate(var(--rot)) scale(1.12);opacity:1; filter:blur(0);}
+  55% {transform:rotate(var(--rot)) scale(1.06);opacity:.7;filter:blur(1px);}
+  100%{transform:rotate(var(--rot)) scale(0);   opacity:0; filter:blur(5px);}
+}
+.floating-postit.popping{animation:fp-pop .28s cubic-bezier(.4,0,.6,1) forwards;pointer-events:none;}
 
 /* ══════════════════════════════════════════════
    MODO CYBER — Rincón de Trabajo
@@ -3229,10 +3236,8 @@ function _createFPNote(text, color, rot, x, y) {
   del.textContent = '×';
   del.addEventListener('mousedown', e => e.stopPropagation());
   del.onclick = () => {
-    note.style.transition = 'opacity .18s ease, transform .18s ease';
-    note.style.opacity = '0';
-    note.style.transform = `rotate(${rot - 6}deg) scale(.85)`;
-    setTimeout(() => { note.remove(); saveFloatingPostits(); }, 190);
+    note.classList.add('popping');
+    setTimeout(() => { note.remove(); saveFloatingPostits(); }, 280);
   };
 
   note.appendChild(ta);
