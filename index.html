@@ -4226,13 +4226,9 @@ function triggerBreathSession() {
   clearInterval(_brTimer); _brTimer = null;
   if (_brMaskRaf) { cancelAnimationFrame(_brMaskRaf); _brMaskRaf = null; }
 
-  const rect = btn.getBoundingClientRect();
-  const ox = rect.left + rect.width  / 2;
-  const oy = rect.top  + rect.height / 2;
-  const maxR = Math.hypot(
-    Math.max(ox, window.innerWidth  - ox),
-    Math.max(oy, window.innerHeight - oy)
-  ) * 1.1;
+  const ox = window.innerWidth  / 2;
+  const oy = window.innerHeight / 2;
+  const maxR = Math.hypot(ox, oy) * 1.1;
   const feather = 200; // px de borde suave
   const dur = 4000;    // ms — expansión lenta
   let t0 = null;
