@@ -4168,6 +4168,7 @@ let _brMaskRaf = null;
 let _brMinutes = 20;
 let _brSecondsLeft = 0;
 let _brTotal = 0;
+let _brOrigin = null; // { ox, oy, maxR, feather } guardado al abrir para revertir
 
 const _BREATH_SEQ = [
   {word:'Inhala',  sub:'lento y profundo…',    dur:4000},
@@ -4234,6 +4235,7 @@ function triggerBreathSession() {
   const dist = Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy));
   const maxR = dist + feather + 20;
   const dur = 4000;    // ms — expansión lenta
+  _brOrigin = { ox, oy, maxR, feather };
   let t0 = null;
 
   const overlay = document.getElementById('breathOverlay');
@@ -4311,21 +4313,40 @@ function closeBreathSession() {
   removeUnderwaterEffect();
   clearInterval(_brSessionTimer); _brSessionTimer = null;
   if (_brMaskRaf) { cancelAnimationFrame(_brMaskRaf); _brMaskRaf = null; }
+
   const overlay = document.getElementById('breathOverlay');
-  overlay.style.opacity = '0';
-  setTimeout(() => {
-    overlay.classList.remove('active');
-    const reset = 'radial-gradient(circle at 50% 50%, black 0%, transparent 0px)';
-    overlay.style.webkitMaskImage = reset;
-    overlay.style.maskImage = reset;
-    overlay.style.opacity = '';
-    document.getElementById('breathMainBtn').classList.remove('pulsing');
-    document.getElementById('breathStatus').textContent = 'Selecciona un tiempo';
-    document.querySelectorAll('.breath-time-btn').forEach(b => b.classList.remove('active'));
-    const ring = document.getElementById('breathRingFill');
-    if (ring) ring.style.strokeDashoffset = 2 * Math.PI * 52;
-    _brSecondsLeft = 0; _brTotal = 0;
-  }, 450);
+  overlay.classList.remove('active'); // oculta guía y desactiva pointer-events
+
+  const { ox, oy, maxR, feather } = _brOrigin || { ox: window.innerWidth/2, oy: window.innerHeight/2, maxR: 1500, feather: 200 };
+  const dur = 4000;
+  let t0 = null;
+
+  function animClose(ts) {
+    if (!t0) t0 = ts;
+    const p    = Math.min((ts - t0) / dur, 1);
+    const ease = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+    const r     = (1 - ease) * maxR;
+    const inner = Math.max(0, r - feather);
+    const mask  = `radial-gradient(circle at ${ox}px ${oy}px, black 0%, black ${inner}px, transparent ${r}px)`;
+    overlay.style.webkitMaskImage = mask;
+    overlay.style.maskImage = mask;
+    if (p < 1) {
+      _brMaskRaf = requestAnimationFrame(animClose);
+    } else {
+      _brMaskRaf = null;
+      const reset = 'radial-gradient(circle at 50% 50%, black 0%, transparent 0px)';
+      overlay.style.webkitMaskImage = reset;
+      overlay.style.maskImage = reset;
+      overlay.style.opacity = '';
+      document.getElementById('breathMainBtn').classList.remove('pulsing');
+      document.getElementById('breathStatus').textContent = 'Selecciona un tiempo';
+      document.querySelectorAll('.breath-time-btn').forEach(b => b.classList.remove('active'));
+      const ring = document.getElementById('breathRingFill');
+      if (ring) ring.style.strokeDashoffset = 2 * Math.PI * 52;
+      _brSecondsLeft = 0; _brTotal = 0;
+    }
+  }
+  _brMaskRaf = requestAnimationFrame(animClose);
 }
 
 /* ════════════════════════════════════
