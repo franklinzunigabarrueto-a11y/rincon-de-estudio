@@ -930,24 +930,24 @@ body.cyber .hist-bar-fill{background:#00e5ff;}
 #breathOverlay.active .breath-guide{opacity:1;}
 .breath-guide-word{
   font-size:58px;font-weight:200;letter-spacing:-2.5px;
-  color:rgba(26,24,21,.82);line-height:1;
-  text-shadow:0 2px 24px rgba(255,255,255,.6);
+  color:#fff;line-height:1;
+  text-shadow:0 2px 16px rgba(0,0,0,.28), 0 1px 4px rgba(0,0,0,.18);
   transition:opacity .22s ease;
 }
 .breath-guide-sub{
-  font-size:15px;color:rgba(106,102,96,.78);
+  font-size:15px;color:rgba(255,255,255,.88);
   letter-spacing:-.2px;font-weight:400;
   transition:opacity .22s ease;
-  text-shadow:0 1px 8px rgba(255,255,255,.5);
+  text-shadow:0 1px 8px rgba(0,0,0,.22);
 }
 .breath-counter-lbl{
-  font-size:11.5px;color:rgba(106,102,96,.5);
+  font-size:11.5px;color:rgba(255,255,255,.9);
   margin-top:18px;letter-spacing:.1px;
-  background:rgba(255,255,255,.35);
+  background:rgba(0,0,0,.18);
   padding:4px 14px;border-radius:20px;
   backdrop-filter:blur(8px);
 }
-.breath-close-hint{font-size:11px;color:rgba(106,102,96,.38);margin-top:26px;}
+.breath-close-hint{font-size:11px;color:rgba(255,255,255,.45);margin-top:26px;}
 
 /* Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
@@ -4623,7 +4623,7 @@ function _stopCyberAnim() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Inicializar módulos flotantes
-  document.querySelectorAll('.module').forEach(m => { makeDraggable(m); initModuleParticles(m); });
+  document.querySelectorAll('.module').forEach(m => { makeDraggable(m); if (m.id !== 'mod-clock') initModuleParticles(m); });
   // Posición inicial de módulos — dentro del área libre (sin solapar sidebars ni topbar)
   const vw  = window.innerWidth;
   const vh  = window.innerHeight;
