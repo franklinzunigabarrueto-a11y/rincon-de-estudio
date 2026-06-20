@@ -3255,6 +3255,9 @@ function filterSpaces(pill, tag) {
    WEB AUDIO — CONTEXTO COMPARTIDO
 ════════════════════════════════════ */
 let _actx = null;
+let _uwFilter = null;
+let _uwGain   = null;
+let _uwActive = false;
 function getActx() {
   if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
   if (_actx.state === 'suspended') _actx.resume();
@@ -3383,7 +3386,7 @@ function toggleAmbient(key, btn) {
     const ctx = getActx();
     const gainNode = ctx.createGain();
     gainNode.gain.value = (slider ? parseInt(slider.value) : 50) / 100 * 0.7;
-    gainNode.connect(ctx.destination);
+    gainNode.connect((_uwActive && _uwFilter) ? _uwFilter : ctx.destination);
     const stop = _SND[key](ctx, gainNode);
     _ambActive[key] = { gainNode, stop };
   } else if (_ambActive[key]) {
@@ -3397,6 +3400,77 @@ function toggleAmbient(key, btn) {
 function setAmbientVol(key, val) {
   if (_ambActive[key]) {
     _ambActive[key].gainNode.gain.setTargetAtTime(parseInt(val)/100*0.7, getActx().currentTime, 0.05);
+  }
+}
+
+function applyUnderwaterEffect() {
+  if (_uwActive) return;
+  _uwActive = true;
+  const ctx = getActx();
+
+  if (!_uwFilter) {
+    _uwFilter = ctx.createBiquadFilter();
+    _uwFilter.type = 'lowpass';
+    _uwFilter.frequency.value = 20000;
+    _uwFilter.Q.value = 0.8;
+    _uwGain = ctx.createGain();
+    _uwGain.gain.value = 1;
+    _uwFilter.connect(_uwGain);
+    _uwGain.connect(ctx.destination);
+  }
+
+  // Reconectar sonidos activos a través del filtro
+  Object.values(_ambActive).forEach(({ gainNode }) => {
+    try { gainNode.disconnect(ctx.destination); } catch {}
+    try { gainNode.connect(_uwFilter); } catch {}
+  });
+
+  // Cerrar el filtro gradualmente (efecto de inmersión)
+  const now = ctx.currentTime;
+  _uwFilter.frequency.cancelScheduledValues(now);
+  _uwFilter.frequency.setValueAtTime(_uwFilter.frequency.value || 20000, now);
+  _uwFilter.frequency.exponentialRampToValueAtTime(380, now + 2.8);
+  _uwFilter.Q.cancelScheduledValues(now);
+  _uwFilter.Q.setValueAtTime(_uwFilter.Q.value || 0.8, now);
+  _uwFilter.Q.linearRampToValueAtTime(4.5, now + 2.8);
+  _uwGain.gain.cancelScheduledValues(now);
+  _uwGain.gain.setValueAtTime(_uwGain.gain.value || 1, now);
+  _uwGain.gain.linearRampToValueAtTime(0.78, now + 2.8);
+
+  // YouTube: bajar volumen a ~20% para efecto amortiguado
+  if (typeof ytCurrentId !== 'undefined' && ytCurrentId) {
+    sendYTCmd('setVolume', [Math.max(5, Math.round((typeof ytVolume !== 'undefined' ? ytVolume : 80) * 0.2))]);
+  }
+}
+
+function removeUnderwaterEffect() {
+  if (!_uwActive || !_uwFilter) { _uwActive = false; return; }
+  _uwActive = false;
+  const ctx = getActx();
+  const now = ctx.currentTime;
+
+  // Abrir el filtro de vuelta (emergencia suave)
+  _uwFilter.frequency.cancelScheduledValues(now);
+  _uwFilter.frequency.setValueAtTime(_uwFilter.frequency.value, now);
+  _uwFilter.frequency.exponentialRampToValueAtTime(20000, now + 1.8);
+  _uwFilter.Q.cancelScheduledValues(now);
+  _uwFilter.Q.setValueAtTime(_uwFilter.Q.value, now);
+  _uwFilter.Q.linearRampToValueAtTime(0.8, now + 1.8);
+  _uwGain.gain.cancelScheduledValues(now);
+  _uwGain.gain.setValueAtTime(_uwGain.gain.value, now);
+  _uwGain.gain.linearRampToValueAtTime(1, now + 1.8);
+
+  // Tras la transición, desconectar del filtro y volver a destination
+  setTimeout(() => {
+    Object.values(_ambActive).forEach(({ gainNode }) => {
+      try { gainNode.disconnect(_uwFilter); } catch {}
+      try { gainNode.connect(ctx.destination); } catch {}
+    });
+  }, 2000);
+
+  // Restaurar volumen YouTube
+  if (typeof ytCurrentId !== 'undefined' && ytCurrentId) {
+    sendYTCmd('setVolume', [typeof ytVolume !== 'undefined' ? ytVolume : 80]);
   }
 }
 
@@ -4166,6 +4240,7 @@ function triggerBreathSession() {
   const overlay = document.getElementById('breathOverlay');
   overlay.style.opacity = '1';
   overlay.classList.add('active');
+  applyUnderwaterEffect();
 
   function animMask(ts) {
     if (!t0) t0 = ts;
@@ -4234,6 +4309,7 @@ function _playBreathBell() {
 }
 
 function closeBreathSession() {
+  removeUnderwaterEffect();
   clearInterval(_brSessionTimer); _brSessionTimer = null;
   if (_brMaskRaf) { cancelAnimationFrame(_brMaskRaf); _brMaskRaf = null; }
   const overlay = document.getElementById('breathOverlay');
